@@ -30,7 +30,7 @@
 
 ## Установка
 
-1. Скачайте `smart-recognizer_<версия>.zip` (сборку — см. «Разработка») и распакуйте в папку плагинов Jellyfin, например `<data>/plugins/SmartRecognizer_0.1.0.0/`.
+1. Скачайте `smart-recognizer_<версия>.zip` со страницы **Releases** репозитория (или из артефактов GitHub Actions) и распакуйте в папку плагинов Jellyfin, например `<data>/plugins/SmartRecognizer_0.1.0.0/`.
 2. Перезапустите Jellyfin. В «Панель управления → Плагины» должен появиться **Smart Recognizer** со статусом Active.
 
 ## Настройка
@@ -101,6 +101,24 @@ pip install jprm
 
 ```bash
 jprm plugin build . --output=artifacts
+```
+
+### CI и релизы
+
+GitHub Actions (`.github/workflows/build.yml`) на каждый push в `main` и каждый pull request:
+- запускает тесты;
+- собирает ZIP через jprm;
+- проверяет, что в ZIP нет сборок сервера;
+- выкладывает ZIP в артефакты запуска (вкладка **Actions** → запуск → **Artifacts**).
+
+Релиз выпускается по тегу: из `v0.2.0` получается версия плагина `0.2.0.0`, а ZIP прикрепляется к GitHub Release.
+
+```bash
+git tag v0.2.0
+```
+
+```bash
+git push origin v0.2.0
 ```
 
 Структура и правила — в [CLAUDE.md](CLAUDE.md). План и журнал реализации — `docs/plans/completed/`. Как Jellyfin 12.4 обрабатывает номера сезонов и серий — `docs/spikes/`.
