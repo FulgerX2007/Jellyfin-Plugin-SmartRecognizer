@@ -415,10 +415,10 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Providers/SeasonProviderTests.cs`
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/DependencyInjectionTests.cs`
 
-- [ ] write tests first: сериал распознаётся по имени папки (в т.ч. аниме-батч `[Group] Title (01-12)`); сезон получает название/описание/дату по `SeriesProviderIds` + номеру сезона
-- [ ] write tests for edge cases: сезон без номера, сезон 0 (specials), сериал найден только в Кинопоиске — заполняются доступные поля
-- [ ] реализовать `SeriesProvider` и `SeasonProvider` (по выводам Task 2); добавить в DI wiring test
-- [ ] run tests - must pass before task 18
+- [x] write tests first: сериал распознаётся по имени папки (в т.ч. аниме-батч `[Group] Title (01-12)`); сезон получает название/описание/дату по `SeriesProviderIds` + номеру сезона
+- [x] write tests for edge cases: сезон без номера, сезон 0 (specials), сериал найден только в Кинопоиске — заполняются доступные поля
+- [x] реализовать `SeriesProvider` и `SeasonProvider` (по выводам Task 2); добавить в DI wiring test
+- [x] run tests - must pass before task 18
 
 ### Task 18: Episode metadata provider with absolute numbering
 

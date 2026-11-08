@@ -45,6 +45,8 @@ public class DependencyInjectionTests
 
     [Theory]
     [InlineData(typeof(MovieProvider))]
+    [InlineData(typeof(SeriesProvider))]
+    [InlineData(typeof(SeasonProvider))]
     public void Providers_CanBeCreatedFromTheContainer(Type providerType)
     {
         using var provider = BuildProvider();
