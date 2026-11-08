@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using Jellyfin.Plugin.SmartRecognizer.Configuration;
 using Jellyfin.Plugin.SmartRecognizer.Sources;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Kinopoisk;
+using Jellyfin.Plugin.SmartRecognizer.Sources.Omdb;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Tmdb;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
@@ -33,5 +34,6 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<IMetadataSource>(sp => sp.GetRequiredService<TmdbSource>());
         serviceCollection.AddSingleton<IEpisodeSource>(sp => sp.GetRequiredService<TmdbSource>());
         serviceCollection.AddSingleton<IMetadataSource, KinopoiskSource>();
+        serviceCollection.AddSingleton<IMetadataSource, OmdbSource>();
     }
 }

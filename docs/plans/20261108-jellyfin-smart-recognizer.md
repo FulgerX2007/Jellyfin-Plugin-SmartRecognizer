@@ -333,10 +333,10 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/omdb/*.json`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Sources/OmdbSourceTests.cs`
 
-- [ ] write tests first: lookup по imdb ID, поиск по названию + году + типу, разбор рейтингов IMDb (`8.9/10`), RT (`94%`), Metacritic
-- [ ] write tests for edge cases: `"Response":"False"` с `Error`, `"N/A"` → null, лимит запросов
-- [ ] реализовать `OmdbSource : IMetadataSource`; зарегистрировать в DI
-- [ ] run tests - must pass before task 12
+- [x] write tests first: lookup по imdb ID, поиск по названию + году + типу, разбор рейтингов IMDb (`8.9/10`), RT (`94%`), Metacritic
+- [x] write tests for edge cases: `"Response":"False"` с `Error`, `"N/A"` → null, лимит запросов
+- [x] реализовать `OmdbSource : IMetadataSource`; зарегистрировать в DI
+- [x] run tests - must pass before task 12
 
 ### Task 12: TVDB source client
 
