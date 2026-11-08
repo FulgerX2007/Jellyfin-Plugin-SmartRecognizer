@@ -4,6 +4,7 @@ using Jellyfin.Plugin.SmartRecognizer.Sources;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Kinopoisk;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Omdb;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Tmdb;
+using Jellyfin.Plugin.SmartRecognizer.Sources.Tvdb;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,5 +36,9 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<IEpisodeSource>(sp => sp.GetRequiredService<TmdbSource>());
         serviceCollection.AddSingleton<IMetadataSource, KinopoiskSource>();
         serviceCollection.AddSingleton<IMetadataSource, OmdbSource>();
+        serviceCollection.AddSingleton<TvdbTokenProvider>();
+        serviceCollection.AddSingleton<TvdbSource>();
+        serviceCollection.AddSingleton<IMetadataSource>(sp => sp.GetRequiredService<TvdbSource>());
+        serviceCollection.AddSingleton<IEpisodeSource>(sp => sp.GetRequiredService<TvdbSource>());
     }
 }

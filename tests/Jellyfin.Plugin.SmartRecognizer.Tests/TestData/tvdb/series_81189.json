@@ -1,0 +1,9 @@
+{"status":"success","data":{"id":81189,"name":"Breaking Bad","year":"2008","overview":"Walter White, a chemistry teacher...","firstAired":"2008-01-20","lastAired":"2013-09-29","status":{"name":"Ended"},"averageRuntime":47,
+ "genres":[{"name":"Drama"},{"name":"Crime"}],"originalNetwork":{"name":"AMC"},
+ "remoteIds":[{"id":"tt0903747","type":2,"sourceName":"IMDB"},{"id":"1396","type":12,"sourceName":"TheMovieDB.com"}],
+ "artworks":[{"image":"https://artworks.thetvdb.com/poster_rus.jpg","type":2,"language":"rus","width":680,"height":1000,"score":10},
+             {"image":"https://artworks.thetvdb.com/poster_eng.jpg","type":2,"language":"eng","width":680,"height":1000,"score":50},
+             {"image":"https://artworks.thetvdb.com/fanart.jpg","type":3,"language":null,"width":1920,"height":1080},
+             {"image":"https://artworks.thetvdb.com/logo.png","type":23,"language":"eng"},
+             {"image":"https://artworks.thetvdb.com/banner.jpg","type":1,"language":"eng"}],
+ "translations":{"nameTranslations":[{"name":"Во все тяжкие","language":"rus"}],"overviewTranslations":[{"overview":"Учитель химии Уолтер Уайт...","language":"rus"}]}}}

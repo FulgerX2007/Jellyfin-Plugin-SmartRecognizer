@@ -348,10 +348,10 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/tvdb/*.json`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Sources/TvdbSourceTests.cs`
 
-- [ ] write tests first: логин и кэширование токена, повторный логин при 401, поиск сериала, `series/{id}/extended`, серии в порядке `default` и `absolute`, переводы (`translations/rus`)
-- [ ] write tests for edge cases: неверный ключ/PIN, параллельные запросы не логинятся дважды, сериал без absolute-порядка
-- [ ] реализовать `TvdbTokenProvider` и `TvdbSource : IMetadataSource, IEpisodeSource`; зарегистрировать в DI
-- [ ] run tests - must pass before task 13
+- [x] write tests first: логин и кэширование токена, повторный логин при 401, поиск сериала, `series/{id}/extended`, серии в порядке `default` и `absolute`, переводы (`translations/rus`)
+- [x] write tests for edge cases: неверный ключ/PIN, параллельные запросы не логинятся дважды, сериал без absolute-порядка
+- [x] реализовать `TvdbTokenProvider` и `TvdbSource : IMetadataSource, IEpisodeSource`; зарегистрировать в DI (⚠️ только сериалы; названия/описания сезонов берутся из TMDb — в TVDB их почти нет на русском)
+- [x] run tests - must pass before task 13
 
 ### Task 13: Candidate resolver — staged, quota-aware search
 

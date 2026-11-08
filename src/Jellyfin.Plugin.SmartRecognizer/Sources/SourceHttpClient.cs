@@ -82,28 +82,40 @@ public sealed partial class SourceHttpClient : IDisposable
         string cacheKey,
         Func<HttpRequestMessage> createRequest,
         CancellationToken cancellationToken)
+        where T : class =>
+        (await SendJsonAsync<T>(source, cacheKey, createRequest, cancellationToken).ConfigureAwait(false)).Value;
+
+    /// <summary>
+    /// Same as <see cref="GetJsonAsync{T}"/>, but also reports the final HTTP status
+    /// (null for cache hits, network errors and skipped requests).
+    /// </summary>
+    public async Task<SourceResponse<T>> SendJsonAsync<T>(
+        MetadataSourceKind source,
+        string cacheKey,
+        Func<HttpRequestMessage> createRequest,
+        CancellationToken cancellationToken)
         where T : class
     {
         cancellationToken.ThrowIfCancellationRequested();
         var key = $"smartrecognizer:{source}:{cacheKey}";
         if (_cache.TryGetValue(key, out CacheEntry<T>? cached) && cached is not null)
         {
-            return cached.Value;
+            return new SourceResponse<T>(cached.Value, null);
         }
 
         if (IsQuotaExhausted(source))
         {
-            return null;
+            return new SourceResponse<T>(null, null);
         }
 
-        var (value, cacheable) = await SendAsync<T>(source, createRequest, cancellationToken).ConfigureAwait(false);
+        var (value, cacheable, status) = await SendAsync<T>(source, createRequest, cancellationToken).ConfigureAwait(false);
         if (cacheable)
         {
             var ttl = value is null ? Min(NegativeCacheTtl, PositiveTtl()) : PositiveTtl();
             _cache.Set(key, new CacheEntry<T>(value), ttl);
         }
 
-        return value;
+        return new SourceResponse<T>(value, status);
     }
 
     public void Dispose()
@@ -114,7 +126,7 @@ public sealed partial class SourceHttpClient : IDisposable
         }
     }
 
-    private async Task<(T? Value, bool Cacheable)> SendAsync<T>(
+    private async Task<(T? Value, bool Cacheable, HttpStatusCode? Status)> SendAsync<T>(
         MetadataSourceKind source,
         Func<HttpRequestMessage> createRequest,
         CancellationToken cancellationToken)
@@ -137,7 +149,7 @@ public sealed partial class SourceHttpClient : IDisposable
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException)
             {
                 LogRequestFailed(source, ex.GetType().Name);
-                return (null, false);
+                return (null, false, null);
             }
 
             using (response)
@@ -145,24 +157,24 @@ public sealed partial class SourceHttpClient : IDisposable
                 var status = response.StatusCode;
                 if (response.IsSuccessStatusCode)
                 {
-                    return (await ReadJsonAsync<T>(source, response, cancellationToken).ConfigureAwait(false), true);
+                    return (await ReadJsonAsync<T>(source, response, cancellationToken).ConfigureAwait(false), true, status);
                 }
 
                 if (_quotaStatusCodes.TryGetValue(source, out var quotaCodes) && quotaCodes.Contains(status))
                 {
                     MarkQuotaExhausted(source);
-                    return (null, false);
+                    return (null, false, status);
                 }
 
                 if (status == HttpStatusCode.NotFound)
                 {
-                    return (null, true);
+                    return (null, true, status);
                 }
 
                 if (status is HttpStatusCode.Unauthorized)
                 {
                     LogUnauthorized(source);
-                    return (null, false);
+                    return (null, false, status);
                 }
 
                 if (status is HttpStatusCode.TooManyRequests or HttpStatusCode.ServiceUnavailable && attempt < MaxRetries)
@@ -171,7 +183,7 @@ public sealed partial class SourceHttpClient : IDisposable
                     if (delay > MaxRetryDelay)
                     {
                         LogRetryTooLong(source, (int)status, delay.TotalSeconds);
-                        return (null, false);
+                        return (null, false, status);
                     }
 
                     await Task.Delay(delay, _timeProvider, cancellationToken).ConfigureAwait(false);
@@ -179,7 +191,7 @@ public sealed partial class SourceHttpClient : IDisposable
                 }
 
                 LogUnexpectedStatus(source, (int)status);
-                return (null, false);
+                return (null, false, status);
             }
         }
     }
@@ -257,3 +269,7 @@ public sealed partial class SourceHttpClient : IDisposable
 
     private sealed record CacheEntry<T>(T? Value);
 }
+
+/// <summary>A JSON response and the HTTP status it came with (null when no request was made).</summary>
+public readonly record struct SourceResponse<T>(T? Value, HttpStatusCode? Status)
+    where T : class;
