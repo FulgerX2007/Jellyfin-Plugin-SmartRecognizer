@@ -75,7 +75,38 @@
                         </div>
                     </div>
 
-                    <!-- AI fallback settings are added in Task 22. -->
+                    <div class="verticalSection">
+                        <h3 class="sectionTitle">ИИ — запасной вариант</h3>
+                        <p>Вызывается только для имён, которые правила не смогли распознать. Ответ ИИ — лишь подсказка:
+                           плагин всё равно ищет фильм в источниках и применяет тот же порог уверенности.</p>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label"><input id="AiEnabled" type="checkbox" is="emby-checkbox" /><span>Включить ИИ-фоллбэк</span></label>
+                        </div>
+                        <div class="selectContainer">
+                            <select id="AiProvider" is="emby-select" label="Провайдер">
+                                <option value="Anthropic">Anthropic (Claude)</option>
+                                <option value="OpenAiCompatible">OpenAI-совместимый (OpenAI, Ollama, LM Studio)</option>
+                            </select>
+                        </div>
+                        <div class="inputContainer">
+                            <input id="AiEndpoint" type="text" is="emby-input" label="Адрес API (только для OpenAI-совместимого), напр. http://ollama:11434/v1" />
+                        </div>
+                        <div class="inputContainer">
+                            <input id="AiApiKey" type="password" is="emby-input" autocomplete="off" label="API-ключ (для локальной модели не нужен)" />
+                        </div>
+                        <div class="inputContainer">
+                            <input id="AiModel" type="text" is="emby-input" label="Модель" />
+                            <div class="fieldDescription">Для разбора имён хватает быстрой недорогой модели, например claude-haiku-5-5.</div>
+                        </div>
+                        <div class="inputContainer">
+                            <input id="AiDailyRequestLimit" type="number" is="emby-input" min="0" step="1" label="Лимит запросов в сутки" />
+                            <div class="fieldDescription">Защита от расходов при сканировании большой библиотеки. Счётчик переживает перезапуск сервера.</div>
+                        </div>
+                        <div class="fieldDescription" style="color:#e0a000">
+                            ⚠ Приватность: при облачном провайдере имя файла и до двух родительских папок отправляются во внешний сервис.
+                            Чтобы имена не покидали сервер, используйте локальную модель через OpenAI-совместимый API.
+                        </div>
+                    </div>
 
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button"><span>Сохранить</span></button>
@@ -86,9 +117,9 @@
         <script type="text/javascript">
             (function () {
                 var pluginId = '6f1d2c7e-3b9a-4e51-9c8d-2a7f4b0e5d13';
-                var textFields = ['TmdbApiKey', 'KinopoiskApiKey', 'OmdbApiKey', 'TvdbApiKey', 'TvdbPin', 'PreferredLanguage'];
-                var numberFields = ['MinConfidence', 'CacheTtlHours'];
-                var boolFields = ['EnableTmdb', 'EnableKinopoisk', 'EnableOmdb', 'EnableTvdb'];
+                var textFields = ['TmdbApiKey', 'KinopoiskApiKey', 'OmdbApiKey', 'TvdbApiKey', 'TvdbPin', 'PreferredLanguage', 'AiProvider', 'AiEndpoint', 'AiApiKey', 'AiModel'];
+                var numberFields = ['MinConfidence', 'CacheTtlHours', 'AiDailyRequestLimit'];
+                var boolFields = ['EnableTmdb', 'EnableKinopoisk', 'EnableOmdb', 'EnableTvdb', 'AiEnabled'];
                 var page = document.querySelector('#SmartRecognizerConfigPage');
 
                 function el(id) { return page.querySelector('#' + id); }

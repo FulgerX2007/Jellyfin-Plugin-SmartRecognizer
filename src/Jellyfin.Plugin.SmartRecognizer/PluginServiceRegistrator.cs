@@ -8,10 +8,12 @@ using Jellyfin.Plugin.SmartRecognizer.Sources.Kinopoisk;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Omdb;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Tmdb;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Tvdb;
+using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.SmartRecognizer;
 
@@ -49,5 +51,18 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<AnthropicLlmClient>();
         serviceCollection.AddSingleton<OpenAiCompatibleLlmClient>();
         serviceCollection.AddSingleton<ILlmClient, ConfiguredLlmClient>();
+        serviceCollection.AddSingleton(sp => new AiStateStore(
+            AiStateFile(sp.GetService<IApplicationPaths>()),
+            sp.GetRequiredService<TimeProvider>(),
+            sp.GetRequiredService<ILogger<AiStateStore>>()));
+        serviceCollection.AddSingleton<IReleaseFallback, AiReleaseRecognizer>();
+    }
+
+    /// <summary>The AI state file lives next to the plugin's data (falls back to temp outside the server).</summary>
+    private static string AiStateFile(IApplicationPaths? paths)
+    {
+        var folder = Plugin.Instance?.DataFolderPath
+            ?? (paths is null ? Path.Combine(Path.GetTempPath(), "jellyfin-smartrecognizer") : Path.Combine(paths.DataPath, "smartrecognizer"));
+        return Path.Combine(folder, "ai-state.json");
     }
 }

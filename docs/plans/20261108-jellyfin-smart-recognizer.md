@@ -487,11 +487,11 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Ai/AiStateStoreTests.cs`
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Matching/RecognitionPipelineTests.cs`
 
-- [ ] write tests first: корректный JSON → `ParsedRelease`; отправляется только имя файла + 2 родительские папки; ответ кэшируется в `AiStateStore` и переживает пересоздание store (файл во временной папке теста); суточный счётчик сохраняется в файл и сбрасывается при смене суток (`TimeProvider`)
-- [ ] write tests for edge cases: невалидный/неполный JSON → нет подсказки; лимит исчерпан → LLM не вызывается; ИИ выключен или нет ключа/endpoint → фоллбэк не регистрируется; ID от ИИ игнорируются; повреждённый файл состояния → начинаем с пустого
-- [ ] реализовать `AiReleaseRecognizer : IReleaseFallback` (промпт с примерами из корпуса, JSON-схема = поля `ParsedRelease`) и `AiStateStore` (JSON в папке данных плагина); зарегистрировать как хук pipeline
-- [ ] добавить на страницу настроек блок «ИИ» (провайдер, endpoint, ключ, модель, лимит, предупреждение о приватности); обновить тест pipeline: ИИ не вызывается при уверенном совпадении правил
-- [ ] run tests - must pass before task 23
+- [x] write tests first: корректный JSON → `ParsedRelease`; отправляется только имя файла + 2 родительские папки; ответ кэшируется в `AiStateStore` и переживает пересоздание store (файл во временной папке теста); суточный счётчик сохраняется в файл и сбрасывается при смене суток (`TimeProvider`)
+- [x] write tests for edge cases: невалидный/неполный JSON → нет подсказки; лимит исчерпан → LLM не вызывается; ИИ выключен или нет ключа/endpoint → модель не вызывается (⚠️ фоллбэк зарегистрирован всегда и проверяет настройки на каждом вызове — они меняются на лету); ID от ИИ игнорируются; повреждённый файл состояния → начинаем с пустого
+- [x] реализовать `AiReleaseRecognizer : IReleaseFallback` (промпт с примерами из корпуса, JSON-схема = поля `ParsedRelease`) и `AiStateStore` (JSON в папке данных плагина); зарегистрировать как хук pipeline
+- [x] добавить на страницу настроек блок «ИИ» (провайдер, endpoint, ключ, модель, лимит, предупреждение о приватности); обновить тест pipeline: ИИ не вызывается при уверенном совпадении правил
+- [x] run tests - must pass before task 23
 
 ### Task 23: Verify acceptance criteria
 - [ ] verify all requirements from Overview are implemented: 4 типа имён распознаются, 4 источника работают, `ProviderIds` проставляются

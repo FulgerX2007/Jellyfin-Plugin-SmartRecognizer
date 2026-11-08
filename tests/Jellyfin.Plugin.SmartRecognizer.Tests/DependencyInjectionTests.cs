@@ -30,6 +30,7 @@ public class DependencyInjectionTests
         Assert.NotNull(provider.GetRequiredService<RecognitionPipeline>());
         Assert.Equal(4, provider.GetServices<IMetadataSource>().Count());
         Assert.Equal(2, provider.GetServices<IEpisodeSource>().Count());
+        Assert.IsType<SmartRecognizer.Ai.AiReleaseRecognizer>(Assert.Single(provider.GetServices<IReleaseFallback>()));
     }
 
     [Fact]
