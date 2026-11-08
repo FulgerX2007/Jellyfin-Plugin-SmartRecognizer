@@ -42,10 +42,9 @@ public sealed partial class AnthropicLlmClient : ILlmClient
             ["max_tokens"] = MaxTokens,
             ["system"] = instructions,
             ["messages"] = new JsonArray(new JsonObject { ["role"] = "user", ["content"] = input }),
+            // No "effort": older models (e.g. claude-haiku-4-5) reject it with HTTP 400.
             ["output_config"] = new JsonObject
             {
-                // Parsing a file name is simple work: keep it fast and cheap.
-                ["effort"] = "low",
                 ["format"] = new JsonObject { ["type"] = "json_schema", ["schema"] = schema.DeepClone() },
             },
         };

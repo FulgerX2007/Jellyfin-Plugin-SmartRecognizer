@@ -228,4 +228,51 @@ public class RecognitionPipelineTests
         await _kp.DidNotReceiveWithAnyArgs().SearchAsync(default!, default);
         await _omdb.DidNotReceiveWithAnyArgs().SearchAsync(default!, default);
     }
+
+    [Fact]
+    public async Task EpisodeFile_InMovieLookup_IsSkippedWithoutSearchOrAi()
+    {
+        // Seen in a real library: an episode in a "Movies" library reached the movie provider.
+        var result = await Create(withFallback: true).RecognizeAsync(
+            Movie("/media/Bluey (2018) [tvdbid-79168]/Season 03/Bluey.2018.S03E42.Show.and.Tell.1080p.DSNP.WEB-DL.DD+5.1.H.264-TGS.mkv"),
+            CancellationToken.None);
+
+        Assert.Null(result);
+        await _tmdb.DidNotReceiveWithAnyArgs().SearchAsync(default!, default);
+        await _fallback.DidNotReceiveWithAnyArgs().SuggestAsync(default!, default);
+    }
+
+    [Fact]
+    public async Task IdTagsInPath_AreUsedInsteadOfSearch()
+    {
+        _tmdb.GetDetailsAsync(Arg.Is<ProviderIdSet>(i => i.Tmdb == "949"), Arg.Any<MediaKind>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new SourceDetails { Source = MetadataSourceKind.Tmdb, Ids = new ProviderIdSet("tt0113277", "949"), Title = "Схватка" });
+
+        var result = await Create().RecognizeAsync(Movie("/movies/Heat (1995) [tmdbid-949]/Heat.1995.mkv"), CancellationToken.None);
+
+        Assert.Equal("949", result?.Ids.Tmdb);
+        await _tmdb.DidNotReceiveWithAnyArgs().SearchAsync(default!, default);
+    }
+
+    [Fact]
+    public async Task WrongIdTag_FallsBackToSearch()
+    {
+        TmdbFinds("Heat", 1995, "949");
+        _tmdb.GetDetailsAsync(Arg.Is<ProviderIdSet>(i => i.Tmdb == "949"), Arg.Any<MediaKind>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new SourceDetails { Source = MetadataSourceKind.Tmdb, Ids = new ProviderIdSet(Tmdb: "949"), Title = "Heat" });
+
+        var result = await Create().RecognizeAsync(Movie("/movies/Heat (1995) [tmdbid-999999]/Heat.1995.mkv"), CancellationToken.None);
+
+        Assert.Equal("949", result?.Ids.Tmdb);
+    }
+
+    [Fact]
+    public async Task TvdbTagInMovieLookup_IsIgnored()
+    {
+        TmdbFinds("Heat", 1995, "949");
+
+        await Create().RecognizeAsync(Movie("/movies/Heat (1995) [tvdbid-123]/Heat.1995.mkv"), CancellationToken.None);
+
+        await _tmdb.Received().SearchAsync(Arg.Any<SearchQuery>(), Arg.Any<CancellationToken>());
+    }
 }

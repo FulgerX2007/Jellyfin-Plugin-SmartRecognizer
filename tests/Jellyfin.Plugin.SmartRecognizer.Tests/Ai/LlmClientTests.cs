@@ -49,6 +49,7 @@ public class LlmClientTests
         Assert.Equal("json_schema", body["output_config"]!["format"]!["type"]!.GetValue<string>());
         Assert.NotNull(body["output_config"]!["format"]!["schema"]!["properties"]);
         Assert.Null(body["tool_choice"]);
+        Assert.Null(body["output_config"]!["effort"]);
         Assert.Null(body["temperature"]);
         Assert.Equal("The Dark Knight", result!.RootElement.GetProperty("titles")[1].GetString());
     }
@@ -198,5 +199,50 @@ public class LlmClientTests
 
         Assert.Equal("api.anthropic.com", handler.Requests[0].RequestUri!.Host);
         Assert.Equal("ollama", handler.Requests[1].RequestUri!.Host);
+    }
+
+    [Fact]
+    public async Task Anthropic_ErrorMessage_IsLogged()
+    {
+        var logger = new ListLogger<AnthropicLlmClient>();
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(
+            """{"type":"error","error":{"type":"invalid_request_error","message":"model: claude-haiku-9 not found"}}""",
+            HttpStatusCode.BadRequest));
+        var client = new AnthropicLlmClient(TestServices.HttpFactory(handler), new FixedConfiguration(Config()), logger);
+
+        await client.ExtractAsync("i", "x", Schema, CancellationToken.None);
+
+        var message = Assert.Single(logger.Messages);
+        Assert.Contains("HTTP 400", message, StringComparison.Ordinal);
+        Assert.Contains("invalid_request_error", message, StringComparison.Ordinal);
+        Assert.Contains("claude-haiku-9 not found", message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task OpenAi_ErrorMessage_IsLogged()
+    {
+        var logger = new ListLogger<OpenAiCompatibleLlmClient>();
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(
+            """{"error":{"message":"model 'qwen9' not found","type":"invalid_request_error"}}""",
+            HttpStatusCode.NotFound));
+        var client = new OpenAiCompatibleLlmClient(TestServices.HttpFactory(handler), new FixedConfiguration(Config(c => c.AiEndpoint = "http://x/v1")), logger);
+
+        await client.ExtractAsync("i", "x", Schema, CancellationToken.None);
+
+        Assert.Contains("model 'qwen9' not found", Assert.Single(logger.Messages), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task VeryLongErrorBody_IsTruncated()
+    {
+        var logger = new ListLogger<AnthropicLlmClient>();
+        var handler = new FakeHttpMessageHandler(_ => FakeHttpMessageHandler.Json(
+            "{\"error\":{\"type\":\"x\",\"message\":\"" + new string('a', 5000) + "\"}}",
+            HttpStatusCode.BadRequest));
+        var client = new AnthropicLlmClient(TestServices.HttpFactory(handler), new FixedConfiguration(Config()), logger);
+
+        await client.ExtractAsync("i", "x", Schema, CancellationToken.None);
+
+        Assert.True(Assert.Single(logger.Messages).Length < 600);
     }
 }

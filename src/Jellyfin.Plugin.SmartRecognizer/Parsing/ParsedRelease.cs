@@ -42,6 +42,12 @@ public sealed record ParsedRelease
     /// <summary>Gets the release source, e.g. BluRay, WEB-DL, BDRip.</summary>
     public string? Source { get; init; }
 
+    /// <summary>
+    /// Gets IDs written into the path as tags (<c>[tmdbid-949]</c>, <c>[tvdbid-79168]</c>, <c>{imdb-tt0468569}</c>),
+    /// keyed "Tmdb", "Tvdb", "Imdb". The closest segment wins.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> ProviderIds { get; init; } = new Dictionary<string, string>();
+
     /// <summary>Gets audio/dub tags, e.g. Дубляж, MVO.</summary>
     public IReadOnlyList<string> AudioTags { get; init; } = [];
 }

@@ -54,6 +54,27 @@ public sealed partial class RecognitionPipeline
         double? score = null;
         if (ids.IsEmpty)
         {
+            var parsed = Parse(request.Path);
+
+            // An episode file reached the movie provider (it sits in a "Movies" library):
+            // searching movies for it can only find the wrong thing, and would waste quota and AI requests.
+            if (request.Kind == MediaKind.Movie && parsed.Kind == MediaKind.Episode)
+            {
+                LogEpisodeInMovieLookup(request.Path);
+                return null;
+            }
+
+            // IDs written into the path ("[tmdbid-949]") beat any search; a wrong tag falls back to it.
+            var tagged = TaggedIds(parsed, request.Kind);
+            if (!tagged.IsEmpty)
+            {
+                var byTag = await FetchDetailsAsync(tagged, request.Kind, request.Language, cancellationToken).ConfigureAwait(false);
+                if (byTag.Count > 0)
+                {
+                    return new RecognitionResult(byTag.Aggregate(tagged, (acc, d) => acc.Merge(d.Ids)), byTag, null);
+                }
+            }
+
             var match = await _resolver.ResolveAsync(BuildMatchRequest(request), cancellationToken).ConfigureAwait(false)
                 ?? await TryFallbacksAsync(request, cancellationToken).ConfigureAwait(false);
             if (match is null)
@@ -142,6 +163,13 @@ public sealed partial class RecognitionPipeline
         return found;
     }
 
+    /// <summary>Path ID tags usable for this lookup: our TVDB source has series only, so not for movies.</summary>
+    private static ProviderIdSet TaggedIds(ParsedRelease parsed, MediaKind kind)
+    {
+        var ids = ProviderIdSet.FromDictionary(parsed.ProviderIds);
+        return kind == MediaKind.Movie ? ids with { Tvdb = null } : ids;
+    }
+
     private MatchRequest BuildMatchRequest(RecognitionRequest request)
     {
         var parsed = Parse(request.Path);
@@ -222,6 +250,9 @@ public sealed partial class RecognitionPipeline
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "{Step} failed")]
     private partial void LogStepFailed(Exception ex, string step);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Skipped movie lookup for {Path}: the name says it is a TV episode. Put such files into a \"Shows\" library")]
+    private partial void LogEpisodeInMovieLookup(string? path);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "No confident match for {Item}")]
     private partial void LogNoMatch(string? item);

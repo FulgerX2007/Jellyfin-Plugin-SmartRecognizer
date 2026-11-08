@@ -28,7 +28,8 @@ internal static class LlmHttp
             using var response = await client.SendAsync(request, timeout.Token).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                return (null, $"HTTP {(int)response.StatusCode}");
+                var errorBody = await response.Content.ReadAsStringAsync(timeout.Token).ConfigureAwait(false);
+                return (null, Describe((int)response.StatusCode, errorBody));
             }
 
             var text = await response.Content.ReadAsStringAsync(timeout.Token).ConfigureAwait(false);
@@ -46,6 +47,34 @@ internal static class LlmHttp
         {
             return (null, ex.GetType().Name);
         }
+    }
+
+    internal const int MaxErrorLength = 300;
+
+    /// <summary>
+    /// "HTTP 400: invalid_request_error: …" from the API's error body (Anthropic and OpenAI shapes),
+    /// shortened. Error bodies never echo the API key.
+    /// </summary>
+    internal static string Describe(int status, string? body)
+    {
+        string? detail = null;
+        try
+        {
+            var error = string.IsNullOrWhiteSpace(body) ? null : JsonNode.Parse(body)?["error"];
+            detail = error switch
+            {
+                JsonObject o => string.Join(": ", new[] { o["type"]?.ToString(), o["message"]?.ToString() }.Where(v => !string.IsNullOrWhiteSpace(v))),
+                JsonValue v => v.ToString(),
+                _ => null,
+            };
+        }
+        catch (JsonException)
+        {
+            detail = null;
+        }
+
+        var text = string.IsNullOrWhiteSpace(detail) ? $"HTTP {status}" : $"HTTP {status}: {detail}";
+        return text.Length > MaxErrorLength ? text[..MaxErrorLength] + "…" : text;
     }
 
     /// <summary>Parses the model's text as a JSON object; null when it is not one.</summary>

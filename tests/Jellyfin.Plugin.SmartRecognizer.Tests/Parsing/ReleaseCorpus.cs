@@ -62,6 +62,10 @@ internal static class ReleaseCorpus
                 case "source":
                     Assert.Equal(StringOrNull(v), actual.Source);
                     break;
+                case "ids":
+                    var expectedIds = v.EnumerateObject().ToDictionary(p => p.Name, p => p.Value.GetString()!);
+                    Assert.Equal(expectedIds.OrderBy(p => p.Key), actual.ProviderIds.OrderBy(p => p.Key));
+                    break;
                 case "audioTags":
                     Assert.Equal(v.EnumerateArray().Select(e => e.GetString()!).ToArray(), actual.AudioTags.ToArray());
                     break;

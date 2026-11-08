@@ -60,11 +60,47 @@ public sealed partial class ReleaseNameParser
             return ParsedRelease.Empty;
         }
 
+        // "[tmdbid-949]" style tags carry IDs, not title words: read them, then drop them.
+        var ids = ExtractProviderIds(segments);
+        segments = segments.Select(s => IdTagRegex().Replace(s, " ").Trim()).Where(s => s.Length > 0).ToList();
+        if (segments.Count == 0)
+        {
+            return ParsedRelease.Empty with { ProviderIds = ids };
+        }
+
         var name = CrcRegex().Replace(StripVideoExtension(segments[^1]), " ");
         var leadingGroup = ExtractLeadingGroup(ref name);
         var parents = segments.Take(segments.Count - 1).ToList();
-        var result = ParseSegments(name, parents, maxYear);
+        var result = ParseSegments(name, parents, maxYear) with { ProviderIds = ids };
         return leadingGroup is null ? result : result with { ReleaseGroup = leadingGroup };
+    }
+
+    /// <summary>ID tags from the file name and up to two parent folders; the closest one wins.</summary>
+    private static Dictionary<string, string> ExtractProviderIds(List<string> segments)
+    {
+        var ids = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var segment in Enumerable.Reverse(segments).Take(3))
+        {
+            foreach (Match m in IdTagRegex().Matches(segment))
+            {
+                var key = m.Groups["src"].Value.ToUpperInvariant() switch
+                {
+                    "TMDB" => "Tmdb",
+                    "TVDB" => "Tvdb",
+                    _ => "Imdb",
+                };
+                var id = m.Groups["id"].Value;
+                var valid = key == "Imdb"
+                    ? id.StartsWith("tt", StringComparison.OrdinalIgnoreCase)
+                    : !id.StartsWith("tt", StringComparison.OrdinalIgnoreCase);
+                if (valid)
+                {
+                    ids.TryAdd(key, id.ToLowerInvariant());
+                }
+            }
+        }
+
+        return ids;
     }
 
     private static ParsedRelease ParseSegments(string name, List<string> parents, int maxYear)
@@ -651,6 +687,9 @@ public sealed partial class ReleaseNameParser
 
     [GeneratedRegex(@"\s-\s(?<e>\d{1,4})(?:v\d)?(?<half>\.5)?(?=\s|$|\[|\()")]
     private static partial Regex AnimeEpisodeRegex();
+
+    [GeneratedRegex(@"[\[{]\s*(?<src>tmdb|tvdb|imdb)(?:id)?\s*[-=:]\s*(?<id>tt\d+|\d+)\s*[\]}]", RegexOptions.IgnoreCase)]
+    private static partial Regex IdTagRegex();
 
     [GeneratedRegex(@"[\[(][0-9A-Fa-f]{8}[\])]")]
     private static partial Regex CrcRegex();

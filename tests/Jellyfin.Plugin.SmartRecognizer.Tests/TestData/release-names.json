@@ -1,5 +1,5 @@
 [
-  {"path": "The.Dark.Knight.2008.1080p.BluRay.x264-GROUP.mkv", "expected": {"titles": ["The Dark Knight"], "year": 2008, "kind": "Movie", "resolution": "1080p", "source": "BluRay", "group": "GROUP"}},
+  {"path": "The.Dark.Knight.2008.1080p.BluRay.x264-GROUP.mkv", "expected": {"titles": ["The Dark Knight"], "year": 2008, "kind": "Movie", "resolution": "1080p", "source": "BluRay", "group": "GROUP", "ids": {}}},
   {"path": "Movie_Name_2019_WEB-DL_720p.mkv", "expected": {"titles": ["Movie Name"], "year": 2019, "kind": "Movie", "resolution": "720p", "source": "WEB-DL", "group": null}},
   {"path": "1917.2019.1080p.WEB-DL.DD5.1.H264-FGT.mkv", "expected": {"titles": ["1917"], "year": 2019, "kind": "Movie", "resolution": "1080p", "source": "WEB-DL", "group": "FGT"}},
   {"path": "2012.2009.BDRip.mkv", "expected": {"titles": ["2012"], "year": 2009, "kind": "Movie", "source": "BDRip"}},
@@ -79,5 +79,10 @@
   {"path": "[SubsPlease] Dandadan - 01 (1080p) [A1B2C3D4].mkv", "expected": {"titles": ["Dandadan"], "absoluteEpisode": 1}},
   {"path": "[Group] Title S01E05 [1080p].mkv", "expected": {"titles": ["Title"], "season": 1, "episodes": [5], "absoluteEpisode": null, "group": "Group"}},
   {"path": "[HorribleSubs] Shingeki no Kyojin - 25 [720p].mkv", "expected": {"titles": ["Shingeki no Kyojin"], "absoluteEpisode": 25, "resolution": "720p", "group": "HorribleSubs"}},
-  {"path": "Anime/Frieren/Season 1/[SubsPlease] Frieren - 05 (1080p).mkv", "expected": {"titles": ["Frieren"], "season": 1, "absoluteEpisode": 5}}
+  {"path": "Anime/Frieren/Season 1/[SubsPlease] Frieren - 05 (1080p).mkv", "expected": {"titles": ["Frieren"], "season": 1, "absoluteEpisode": 5}},
+  {"path": "/media/Bluey (2018) [tvdbid-79168]/Season 03/Bluey.2018.S03E42.Show.and.Tell.1080p.DSNP.WEB-DL.DD+5.1.H.264-TGS.mkv", "expected": {"titles": ["Bluey"], "year": 2018, "kind": "Episode", "season": 3, "episodes": [42], "group": "TGS", "source": "WEB-DL", "resolution": "1080p", "ids": {"Tvdb": "79168"}}},
+  {"path": "Movies/Heat (1995) [tmdbid-949]/Heat.1995.1080p.BluRay.mkv", "expected": {"titles": ["Heat"], "year": 1995, "kind": "Movie", "ids": {"Tmdb": "949"}}},
+  {"path": "Inception (2010) {imdb-tt1375666}.mkv", "expected": {"titles": ["Inception"], "year": 2010, "kind": "Movie", "ids": {"Imdb": "tt1375666"}}},
+  {"path": "TV/Breaking Bad {tvdb-81189}/Season 1/Breaking Bad S01E01.mkv", "expected": {"titles": ["Breaking Bad"], "season": 1, "episodes": [1], "ids": {"Tvdb": "81189"}}},
+  {"path": "Тёмный рыцарь (2008) [imdbid-tt0468569] [tmdbid-155].mkv", "expected": {"titles": ["Тёмный рыцарь"], "year": 2008, "ids": {"Imdb": "tt0468569", "Tmdb": "155"}}}
 ]
