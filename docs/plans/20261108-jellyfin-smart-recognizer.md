@@ -442,11 +442,11 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Providers/KinopoiskExternalIdTests.cs`
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/DependencyInjectionTests.cs`
 
-- [ ] write tests first: изображения Movie/Series по своим `ProviderIds`, Season/Episode — по ID **родительского сериала** + номера сезона/серии; типы `Primary`, `Backdrop`, `Logo`, `Thumb`; порядок источников TMDb → TVDB → Кинопоиск; язык постеров (`ru` → без языка → `en`)
-- [ ] write tests first: `KinopoiskExternalId` поддерживает Movie и Series; URL — `/film/{id}/` для фильма и `/series/{id}/` для сериала
-- [ ] write tests for edge cases: нет ID ни одного источника → пустой список; дубликаты URL; элемент без родителя
-- [ ] реализовать `SmartImageProvider : IRemoteImageProvider`, `KinopoiskExternalId : IExternalId` и `KinopoiskExternalUrlProvider : IExternalUrlProvider` (сигнатуры — по целевой версии из Task 2); добавить в DI wiring test
-- [ ] run tests - must pass before task 20
+- [x] write tests first: изображения Movie/Series по своим `ProviderIds`, Season/Episode — по ID **родительского сериала** + номера сезона/серии; типы `Primary`, `Backdrop`, `Logo`, `Thumb`; порядок источников TMDb → TVDB → Кинопоиск; язык постеров (`ru` → без языка → `en`)
+- [x] write tests first: `KinopoiskExternalId` поддерживает Movie и Series; URL — `/film/{id}/` для фильма и `/series/{id}/` для сериала
+- [x] write tests for edge cases: нет ID ни одного источника → пустой список; дубликаты URL; элемент без родителя
+- [x] реализовать `SmartImageProvider : IRemoteImageProvider`, `KinopoiskExternalId : IExternalId` и `KinopoiskExternalUrlProvider : IExternalUrlProvider` (сигнатуры — по целевой версии из Task 2); добавить в DI wiring test
+- [x] run tests - must pass before task 20
 
 ### Task 20: Plugin configuration page
 
