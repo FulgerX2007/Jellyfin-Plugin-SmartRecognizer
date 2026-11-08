@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using Jellyfin.Plugin.SmartRecognizer.Configuration;
+using Jellyfin.Plugin.SmartRecognizer.Matching;
 using Jellyfin.Plugin.SmartRecognizer.Sources;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Kinopoisk;
 using Jellyfin.Plugin.SmartRecognizer.Sources.Omdb;
@@ -40,5 +41,6 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<TvdbSource>();
         serviceCollection.AddSingleton<IMetadataSource>(sp => sp.GetRequiredService<TvdbSource>());
         serviceCollection.AddSingleton<IEpisodeSource>(sp => sp.GetRequiredService<TvdbSource>());
+        serviceCollection.AddSingleton<CandidateResolver>();
     }
 }

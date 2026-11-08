@@ -361,10 +361,10 @@ public sealed record ParsedRelease
 - Modify: `src/Jellyfin.Plugin.SmartRecognizer/PluginServiceRegistrator.cs`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Matching/CandidateResolverTests.cs`
 
-- [ ] write tests first (моки источников): порядок этапов TMDb → Кинопоиск (только кириллица или язык `ru`) → TVDB (только сериалы) → OMDb; **Кинопоиск/OMDb не вызываются, если TMDb уже дал уверенное совпадение**; лучший кандидат ≥ порога → `ResolvedMatch` со всеми известными ID
-- [ ] write tests for edge cases: все кандидаты ниже порога → нет совпадения; одинаковые названия с разными годами; источник бросил исключение — следующий этап продолжается; выключенный источник пропускается
-- [ ] реализовать `CandidateResolver`; зарегистрировать в DI
-- [ ] run tests - must pass before task 14
+- [x] write tests first (моки источников): порядок этапов TMDb → Кинопоиск (только кириллица или язык `ru`) → TVDB (только сериалы) → OMDb; **Кинопоиск/OMDb не вызываются, если TMDb уже дал уверенное совпадение**; лучший кандидат ≥ порога → `ResolvedMatch` со всеми известными ID
+- [x] write tests for edge cases: все кандидаты ниже порога → нет совпадения; одинаковые названия с разными годами; источник бросил исключение — следующий этап продолжается; выключенный источник пропускается
+- [x] реализовать `CandidateResolver`; зарегистрировать в DI
+- [x] run tests - must pass before task 14
 
 ### Task 14: Metadata merger with fixed field priority
 
