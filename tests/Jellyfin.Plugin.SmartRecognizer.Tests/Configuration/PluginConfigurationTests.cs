@@ -1,3 +1,4 @@
+using System.Xml.Serialization;
 using Jellyfin.Plugin.SmartRecognizer.Configuration;
 
 namespace Jellyfin.Plugin.SmartRecognizer.Tests.Configuration;
@@ -91,5 +92,107 @@ public class PluginConfigurationTests
 
         Assert.NotNull(config);
         Assert.Equal("ru", config.PreferredLanguage);
+    }
+
+    [Fact]
+    public void SettingsPage_IsEmbeddedResource()
+    {
+        var page = Assert.Single(Plugin.Pages());
+        var assembly = typeof(Plugin).Assembly;
+
+        Assert.Equal("Jellyfin.Plugin.SmartRecognizer.Configuration.configPage.html", page.EmbeddedResourcePath);
+        using var stream = assembly.GetManifestResourceStream(page.EmbeddedResourcePath);
+        Assert.NotNull(stream);
+        using var reader = new StreamReader(stream);
+        var html = reader.ReadToEnd();
+        Assert.Contains("6f1d2c7e-3b9a-4e51-9c8d-2a7f4b0e5d13", html, StringComparison.Ordinal);
+        foreach (var field in new[] { "TmdbApiKey", "KinopoiskApiKey", "OmdbApiKey", "TvdbApiKey", "TvdbPin", "MinConfidence", "CacheTtlHours", "PreferredLanguage" })
+        {
+            Assert.Contains($"id=\"{field}\"", html, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void PluginId_MatchesBuildManifest()
+    {
+        var buildYaml = File.ReadAllText(Path.Combine(FindRepoRoot(), "build.yaml"));
+
+        Assert.Contains("6f1d2c7e-3b9a-4e51-9c8d-2a7f4b0e5d13", buildYaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void XmlRoundTrip_KeepsEveryField()
+    {
+        var original = new PluginConfiguration
+        {
+            TmdbApiKey = "a",
+            KinopoiskApiKey = "b",
+            OmdbApiKey = "c",
+            TvdbApiKey = "d",
+            TvdbPin = "e",
+            EnableKinopoisk = false,
+            PreferredLanguage = "en",
+            MinConfidence = 0.9,
+            CacheTtlHours = 48,
+            AiEnabled = true,
+            AiProvider = AiProviderKind.OpenAiCompatible,
+            AiEndpoint = "http://ollama:11434/v1",
+            AiApiKey = "f",
+            AiModel = "qwen",
+            AiDailyRequestLimit = 10,
+        };
+
+        var copy = RoundTrip(original);
+
+        Assert.Equivalent(original, copy);
+    }
+
+    [Fact]
+    public void OldConfigWithoutNewFields_LoadsWithDefaults()
+    {
+        const string xml = "<?xml version=\"1.0\"?><PluginConfiguration><TmdbApiKey>key</TmdbApiKey></PluginConfiguration>";
+
+        var config = Deserialize(xml);
+
+        Assert.Equal("key", config.TmdbApiKey);
+        Assert.Equal("ru", config.PreferredLanguage);
+        Assert.Equal(0.75, config.MinConfidence);
+        Assert.True(config.EnableTvdb);
+        Assert.False(config.AiEnabled);
+    }
+
+    [Fact]
+    public void OutOfRangeMinConfidenceInXml_IsClamped()
+    {
+        var config = Deserialize("<?xml version=\"1.0\"?><PluginConfiguration><MinConfidence>3</MinConfidence></PluginConfiguration>");
+
+        Assert.Equal(1.0, config.MinConfidence);
+    }
+
+    private static PluginConfiguration RoundTrip(PluginConfiguration config)
+    {
+        var serializer = new XmlSerializer(typeof(PluginConfiguration));
+        using var writer = new StringWriter();
+        serializer.Serialize(writer, config);
+        return Deserialize(writer.ToString());
+    }
+
+    private static PluginConfiguration Deserialize(string xml)
+    {
+        var serializer = new XmlSerializer(typeof(PluginConfiguration));
+        using var text = new StringReader(xml);
+        using var reader = System.Xml.XmlReader.Create(text, new System.Xml.XmlReaderSettings { DtdProcessing = System.Xml.DtdProcessing.Prohibit, XmlResolver = null });
+        return (PluginConfiguration)serializer.Deserialize(reader)!;
+    }
+
+    private static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "build.yaml")))
+        {
+            dir = dir.Parent;
+        }
+
+        return dir?.FullName ?? throw new InvalidOperationException("Repository root not found.");
     }
 }

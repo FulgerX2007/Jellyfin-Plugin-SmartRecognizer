@@ -456,10 +456,10 @@ public sealed record ParsedRelease
 - Modify: `src/Jellyfin.Plugin.SmartRecognizer/Jellyfin.Plugin.SmartRecognizer.csproj`
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Configuration/PluginConfigurationTests.cs`
 
-- [ ] write tests first: `GetPages()` возвращает встроенный ресурс, ресурс есть в сборке; XML-сериализация/десериализация `PluginConfiguration` (через `XmlSerializer`) сохраняет все поля
-- [ ] write tests for edge cases: старый конфиг без новых полей загружается с дефолтами
-- [ ] реализовать страницу (компоненты Jellyfin dashboard: ключи как `type=password`, флажки источников, язык, порог, TTL), подключить как `EmbeddedResource`
-- [ ] run tests - must pass before task 21
+- [x] write tests first: `GetPages()` возвращает встроенный ресурс, ресурс есть в сборке; XML-сериализация/десериализация `PluginConfiguration` (через `XmlSerializer`) сохраняет все поля
+- [x] write tests for edge cases: старый конфиг без новых полей загружается с дефолтами
+- [x] реализовать страницу (компоненты Jellyfin dashboard: ключи как `type=password`, флажки источников, язык, порог, TTL), подключить как `EmbeddedResource`
+- [x] run tests - must pass before task 21
 
 ### Task 21: LLM clients (Anthropic and OpenAI-compatible)
 

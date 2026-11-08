@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Smart Recognizer</title>
+</head>
+<body>
+    <div id="SmartRecognizerConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="SmartRecognizerConfigForm">
+                    <div class="verticalSection">
+                        <h2 class="sectionTitle">Smart Recognizer</h2>
+                        <p>Распознаёт фильмы и сериалы по имени файла и берёт метаданные из TMDb, Кинопоиска, OMDb и TVDB.
+                           Источник без API-ключа не используется. В настройках библиотеки поставьте «Smart Recognizer» выше встроенных источников,
+                           а встроенные TheMovieDb / The Open Movie Database лучше выключить: иначе они подставят свою догадку там,
+                           где плагин сознательно ничего не нашёл.</p>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h3 class="sectionTitle">Источники</h3>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label"><input id="EnableTmdb" type="checkbox" is="emby-checkbox" /><span>TMDb</span></label>
+                        </div>
+                        <div class="inputContainer">
+                            <input id="TmdbApiKey" type="password" is="emby-input" autocomplete="off" label="TMDb: API-ключ (v3) или токен доступа на чтение" />
+                            <div class="fieldDescription">themoviedb.org → Settings → API. Бесплатно.</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label"><input id="EnableKinopoisk" type="checkbox" is="emby-checkbox" /><span>Кинопоиск (kinopoisk.dev)</span></label>
+                        </div>
+                        <div class="inputContainer">
+                            <input id="KinopoiskApiKey" type="password" is="emby-input" autocomplete="off" label="Кинопоиск: API-ключ kinopoisk.dev" />
+                            <div class="fieldDescription">Неофициальный API с суточной квотой; когда квота кончается, источник отдыхает до следующих суток.</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label"><input id="EnableOmdb" type="checkbox" is="emby-checkbox" /><span>OMDb (рейтинги IMDb, Rotten Tomatoes)</span></label>
+                        </div>
+                        <div class="inputContainer">
+                            <input id="OmdbApiKey" type="password" is="emby-input" autocomplete="off" label="OMDb: API-ключ" />
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label"><input id="EnableTvdb" type="checkbox" is="emby-checkbox" /><span>TVDB (сериалы, абсолютная нумерация аниме)</span></label>
+                        </div>
+                        <div class="inputContainer">
+                            <input id="TvdbApiKey" type="password" is="emby-input" autocomplete="off" label="TVDB: API-ключ v4" />
+                        </div>
+                        <div class="inputContainer">
+                            <input id="TvdbPin" type="password" is="emby-input" autocomplete="off" label="TVDB: PIN подписчика (если нужен)" />
+                        </div>
+                    </div>
+
+                    <div class="verticalSection">
+                        <h3 class="sectionTitle">Распознавание</h3>
+                        <div class="selectContainer">
+                            <select id="PreferredLanguage" is="emby-select" label="Язык названий и описаний">
+                                <option value="ru">Русский</option>
+                                <option value="en">English</option>
+                                <option value="uk">Українська</option>
+                                <option value="de">Deutsch</option>
+                                <option value="fr">Français</option>
+                                <option value="es">Español</option>
+                            </select>
+                        </div>
+                        <div class="inputContainer">
+                            <input id="MinConfidence" type="number" is="emby-input" min="0.5" max="1" step="0.05" label="Порог уверенности (0.5–1.0)" />
+                            <div class="fieldDescription">Ниже порога плагин честно отвечает «не найдено», вместо того чтобы угадывать. По умолчанию 0.75.</div>
+                        </div>
+                        <div class="inputContainer">
+                            <input id="CacheTtlHours" type="number" is="emby-input" min="1" max="720" step="1" label="Кэш ответов API, часов" />
+                        </div>
+                    </div>
+
+                    <!-- AI fallback settings are added in Task 22. -->
+
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button"><span>Сохранить</span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            (function () {
+                var pluginId = '6f1d2c7e-3b9a-4e51-9c8d-2a7f4b0e5d13';
+                var textFields = ['TmdbApiKey', 'KinopoiskApiKey', 'OmdbApiKey', 'TvdbApiKey', 'TvdbPin', 'PreferredLanguage'];
+                var numberFields = ['MinConfidence', 'CacheTtlHours'];
+                var boolFields = ['EnableTmdb', 'EnableKinopoisk', 'EnableOmdb', 'EnableTvdb'];
+                var page = document.querySelector('#SmartRecognizerConfigPage');
+
+                function el(id) { return page.querySelector('#' + id); }
+
+                page.addEventListener('pageshow', function () {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        textFields.concat(numberFields).forEach(function (f) { if (el(f)) { el(f).value = config[f] === undefined || config[f] === null ? '' : config[f]; } });
+                        boolFields.forEach(function (f) { if (el(f)) { el(f).checked = !!config[f]; } });
+                        Dashboard.hideLoadingMsg();
+                    });
+                });
+
+                page.querySelector('#SmartRecognizerConfigForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        textFields.forEach(function (f) { if (el(f)) { config[f] = el(f).value.trim(); } });
+                        numberFields.forEach(function (f) { if (el(f) && el(f).value !== '') { config[f] = Number(el(f).value); } });
+                        boolFields.forEach(function (f) { if (el(f)) { config[f] = el(f).checked; } });
+                        ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
+                            Dashboard.processPluginConfigurationUpdateResult(result);
+                        });
+                    });
+                    return false;
+                });
+            })();
+        </script>
+    </div>
+</body>
+</html>

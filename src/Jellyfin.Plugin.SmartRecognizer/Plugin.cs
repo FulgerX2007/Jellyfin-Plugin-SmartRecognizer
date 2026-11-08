@@ -30,11 +30,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public override string Description =>
         "Recognizes movies and series from messy file names and fetches metadata from TMDb, Kinopoisk, OMDb and TVDB.";
 
-    public IEnumerable<PluginPageInfo> GetPages()
-    {
-        // The settings page itself is added in Task 20.
-        return [];
-    }
+    public IEnumerable<PluginPageInfo> GetPages() => Pages();
+
+    internal static IEnumerable<PluginPageInfo> Pages() =>
+    [
+        new PluginPageInfo
+        {
+            Name = "SmartRecognizer",
+            DisplayName = PluginName,
+            EmbeddedResourcePath = ResourcePath("Configuration.configPage.html"),
+        },
+    ];
 
     internal static string ResourcePath(string relative) =>
         string.Format(CultureInfo.InvariantCulture, "{0}.{1}", typeof(Plugin).Namespace, relative);
