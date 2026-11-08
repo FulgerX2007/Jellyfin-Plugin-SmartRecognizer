@@ -427,10 +427,10 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Providers/EpisodeProviderTests.cs`
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/DependencyInjectionTests.cs`
 
-- [ ] write tests first: серия по `SeriesProviderIds` + сезон/номер; если Jellyfin не распознал номер (`IndexNumber == null`) — номер из собственного парсинга пути; аниме `AbsoluteEpisode` → сезон/серия через TVDB absolute-порядок (фоллбэк — TMDb)
-- [ ] write tests for edge cases: мультисерийный файл `S01E01-E02` (`IndexNumberEnd`), серии нет в источниках, absolute-номер больше числа серий
-- [ ] реализовать `EpisodeProvider : IRemoteMetadataProvider<Episode, EpisodeInfo>` (поведение номеров — по выводам Task 2); добавить в DI wiring test
-- [ ] run tests - must pass before task 19
+- [x] write tests first: серия по `SeriesProviderIds` + сезон/номер; если Jellyfin не распознал номер (`IndexNumber == null`) — номер из собственного парсинга пути; аниме `AbsoluteEpisode` → сезон/серия через TVDB absolute-порядок (фоллбэк — TMDb)
+- [x] write tests for edge cases: мультисерийный файл `S01E01-E02` (`IndexNumberEnd`), серии нет в источниках, absolute-номер больше числа серий
+- [x] реализовать `EpisodeProvider : IRemoteMetadataProvider<Episode, EpisodeInfo>` (поведение номеров — по выводам Task 2); добавить в DI wiring test (➕ по итогам smoke-теста: явный маркер, найденный нашим парсером, важнее номеров Jellyfin — тот прочитал `Сезон 2/Кухня - Серия 3` как S7E5)
+- [x] run tests - must pass before task 19
 
 ### Task 19: Image provider and Kinopoisk external ID/URL
 
