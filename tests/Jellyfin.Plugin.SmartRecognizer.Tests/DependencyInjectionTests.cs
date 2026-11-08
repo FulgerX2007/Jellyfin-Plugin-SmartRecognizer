@@ -1,5 +1,6 @@
 using Jellyfin.Plugin.SmartRecognizer.Configuration;
 using Jellyfin.Plugin.SmartRecognizer.Matching;
+using Jellyfin.Plugin.SmartRecognizer.Providers;
 using Jellyfin.Plugin.SmartRecognizer.Sources;
 using MediaBrowser.Controller;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,5 +41,14 @@ public class DependencyInjectionTests
         var tmdbAsEpisodes = provider.GetServices<IEpisodeSource>().First(s => s.Kind == MetadataSourceKind.Tmdb);
 
         Assert.Same(tmdbAsMetadata, tmdbAsEpisodes);
+    }
+
+    [Theory]
+    [InlineData(typeof(MovieProvider))]
+    public void Providers_CanBeCreatedFromTheContainer(Type providerType)
+    {
+        using var provider = BuildProvider();
+
+        Assert.NotNull(ActivatorUtilities.CreateInstance(provider, providerType));
     }
 }

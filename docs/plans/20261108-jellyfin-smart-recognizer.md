@@ -400,11 +400,11 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Providers/MovieProviderTests.cs`
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/DependencyInjectionTests.cs`
 
-- [ ] write tests first: `GetMetadata` по пути русского/scene-релиза → заполненный `Movie` с `ProviderIds` и `HasMetadata = true`; `GetSearchResults` для «Identify» (по `Name`/`Year` от пользователя) возвращает список с оценками; lookup по известному ID
-- [ ] write tests for edge cases: нет совпадения → `HasMetadata = false`; все источники выключены; отмена
-- [ ] реализовать `MovieProvider : IRemoteMetadataProvider<Movie, MovieInfo>, IHasOrder` (без регистрации в DI — Jellyfin найдёт его сам); добавить в DI wiring test
-- [ ] smoke-тест вручную: собрать плагин, загрузить в Docker Jellyfin целевой версии, провайдер виден в настройках библиотеки, один фильм распознан; расхождения API — записать ⚠️ и исправить план
-- [ ] run tests - must pass before task 17
+- [x] write tests first: `GetMetadata` по пути русского/scene-релиза → заполненный `Movie` с `ProviderIds` и `HasMetadata = true`; `GetSearchResults` для «Identify» (по `Name`/`Year` от пользователя) возвращает список с оценками; lookup по известному ID
+- [x] write tests for edge cases: нет совпадения → `HasMetadata = false`; все источники выключены; отмена
+- [x] реализовать `MovieProvider : IRemoteMetadataProvider<Movie, MovieInfo>, IHasOrder` (без регистрации в DI — Jellyfin найдёт его сам); добавить в DI wiring test
+- [x] smoke-тест вручную: собрать плагин, загрузить в Docker Jellyfin целевой версии, провайдер виден в настройках библиотеки, один фильм распознан; расхождения API — записать ⚠️ и исправить план — ✅ вместо Docker (демон недоступен) запущена официальная сборка `jellyfin_12.4-amd64.tar.gz`: плагин `Active`, «Smart Recognizer» первый в Movie metadata fetchers, сканирование без ошибок плагина. Распознавание с реальными данными не проверено — нет API-ключей (→ Post-Completion). Попутно: встроенный парсер разобрал `Сезон 2/Кухня - Серия 3.mkv` как S7E5
+- [x] run tests - must pass before task 17
 
 ### Task 17: Series and season metadata providers
 
