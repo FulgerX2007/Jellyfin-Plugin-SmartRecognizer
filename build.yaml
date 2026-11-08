@@ -1,0 +1,17 @@
+---
+name: "Smart Recognizer"
+guid: "6f1d2c7e-3b9a-4e51-9c8d-2a7f4b0e5d13"
+version: "0.1.0.0"
+targetAbi: "12.4.0.0"
+framework: "net10.0"
+overview: "Recognizes movies and series from messy file names and fetches metadata from TMDb, Kinopoisk, OMDb and TVDB"
+description: >
+  Parses Russian releases, scene/torrent names, anime and non-standard season folders,
+  then matches them conservatively across TMDb, Kinopoisk, OMDb and TVDB.
+  Optional AI fallback for names the rules cannot handle.
+category: "Metadata"
+owner: "fulgerx2007"
+artifacts:
+- "Jellyfin.Plugin.SmartRecognizer.dll"
+changelog: >
+  Initial release.

@@ -192,13 +192,13 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Jellyfin.Plugin.SmartRecognizer.Tests.csproj`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Configuration/PluginConfigurationTests.cs`
 
-- [ ] `git init`; определить актуальную стабильную версию Jellyfin, её TFM и `targetAbi`; зафиксировать версии `Jellyfin.Controller`/`Jellyfin.Model` в `Directory.Build.props`
-- [ ] сборки хоста — с `<ExcludeAssets>runtime</ExcludeAssets>`; проверить, доступен ли `System.Threading.RateLimiting` из общего фреймворка хоста (иначе — простой лимитер, см. Technical Details)
-- [ ] включить `Nullable`, `TreatWarningsAsErrors`, анализаторы (как в официальных плагинах jellyfin)
-- [ ] write tests first: значения по умолчанию `PluginConfiguration`; источник без ключа считается выключенным (`IsSourceEnabled`); `MinConfidence` вне диапазона ограничивается
-- [ ] реализовать `Plugin` (Id GUID, Name, `IHasWebPages` — заглушка), `PluginConfiguration` (поля из Technical Details), `IPluginConfigurationAccessor` (читает `Plugin.Instance.Configuration` на каждом вызове), регистрацию accessor в `PluginServiceRegistrator`
-- [ ] `build.yaml` для jprm (name, guid, targetAbi, framework, artifacts)
-- [ ] run `dotnet build` + `dotnet test` — must pass before task 2
+- [x] `git init`; определить актуальную стабильную версию Jellyfin — ✅ **12.4.0, net10.0, targetAbi 12.4.0.0**; зафиксировать версии `Jellyfin.Controller`/`Jellyfin.Model` в `Directory.Build.props`
+- [x] сборки хоста — с `<ExcludeAssets>runtime</ExcludeAssets>`; проверить, доступен ли `System.Threading.RateLimiting` из общего фреймворка хоста (иначе — простой лимитер, см. Technical Details) — ✅ он в ASP.NET Core shared framework → `FrameworkReference Microsoft.AspNetCore.App`, DLL не копируется
+- [x] включить `Nullable`, `TreatWarningsAsErrors`, анализаторы — ⚠️ вместо StyleCop/`AllEnabledByDefault` шаблона взят встроенный `AnalysisMode=Recommended` (меньше шума, те же ключевые правила)
+- [x] write tests first: значения по умолчанию `PluginConfiguration`; источник без ключа считается выключенным (`IsSourceEnabled`); `MinConfidence` вне диапазона ограничивается
+- [x] реализовать `Plugin` (Id GUID, Name, `IHasWebPages` — заглушка), `PluginConfiguration` (поля из Technical Details), `IPluginConfigurationAccessor` (читает `Plugin.Instance.Configuration` на каждом вызове), регистрацию accessor в `PluginServiceRegistrator`
+- [x] `build.yaml` для jprm (name, guid, targetAbi, framework, artifacts)
+- [x] run `dotnet build` + `dotnet test` — must pass before task 2
 
 ### Task 2: Spike — verify Jellyfin episode/season handling by providers
 
