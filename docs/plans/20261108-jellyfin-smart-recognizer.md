@@ -374,10 +374,10 @@ public sealed record ParsedRelease
 - Modify: `src/Jellyfin.Plugin.SmartRecognizer/PluginServiceRegistrator.cs`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Aggregation/MetadataMergerTests.cs`
 
-- [ ] write tests first: слияние для `Movie`, `Series`, `Season`, `Episode` по приоритетам из Technical Details (описание из Кинопоиска при `ru`, `CommunityRating` из OMDb, жанры из TMDb, данные сезона из TVDB); пропуск пустых полей с переходом к следующему источнику
-- [ ] write tests for edge cases: язык ≠ `ru` (Кинопоиск не первый для текстов), все источники пустые по полю, `ProviderIds` и `People` объединяются без дубликатов
-- [ ] реализовать `FieldPriority` (зашитые порядки, зависят только от `PreferredLanguage`) и `MetadataMerger`; зарегистрировать в DI
-- [ ] run tests - must pass before task 15
+- [x] write tests first: слияние для `Movie`, `Series`, `Season`, `Episode` по приоритетам из Technical Details (описание из Кинопоиска при `ru`, `CommunityRating` из OMDb, жанры из TMDb, данные сезона из TVDB); пропуск пустых полей с переходом к следующему источнику
+- [x] write tests for edge cases: язык ≠ `ru` (Кинопоиск не первый для текстов), все источники пустые по полю, `ProviderIds` и `People` объединяются без дубликатов
+- [x] реализовать `FieldPriority` (зашитые порядки, зависят только от `PreferredLanguage`) и `MetadataMerger` (⚠️ статический класс без состояния — в DI не нужен)
+- [x] run tests - must pass before task 15
 
 ### Task 15: Recognition pipeline (without AI) and DI wiring test
 
