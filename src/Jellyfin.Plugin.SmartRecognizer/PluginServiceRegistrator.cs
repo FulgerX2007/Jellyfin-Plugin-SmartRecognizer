@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using Jellyfin.Plugin.SmartRecognizer.Ai;
 using Jellyfin.Plugin.SmartRecognizer.Configuration;
 using Jellyfin.Plugin.SmartRecognizer.Matching;
 using Jellyfin.Plugin.SmartRecognizer.Parsing;
@@ -45,5 +46,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<ReleaseNameParser>();
         serviceCollection.AddSingleton<CandidateResolver>();
         serviceCollection.AddSingleton<RecognitionPipeline>();
+        serviceCollection.AddSingleton<AnthropicLlmClient>();
+        serviceCollection.AddSingleton<OpenAiCompatibleLlmClient>();
+        serviceCollection.AddSingleton<ILlmClient, ConfiguredLlmClient>();
     }
 }

@@ -1,0 +1,1 @@
+{"id":"msg_03","type":"message","role":"assistant","content":[{"type":"text","text":"{\"titles\":[\"Тёмн"}],"stop_reason":"max_tokens","usage":{"input_tokens":10,"output_tokens":1024}}

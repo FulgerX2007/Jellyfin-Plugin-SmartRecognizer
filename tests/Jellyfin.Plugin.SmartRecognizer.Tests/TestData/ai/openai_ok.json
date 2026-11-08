@@ -1,0 +1,1 @@
+{"id":"chatcmpl-1","object":"chat.completion","model":"qwen2.5","choices":[{"index":0,"message":{"role":"assistant","content":"{\"titles\":[\"Heat\"],\"year\":1995,\"kind\":\"Movie\",\"season\":null,\"episodes\":[],\"absoluteEpisode\":null}"},"finish_reason":"stop"}]}

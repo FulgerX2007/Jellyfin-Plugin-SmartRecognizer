@@ -1,0 +1,1 @@
+{"id":"msg_02","type":"message","role":"assistant","content":[],"stop_reason":"refusal","stop_details":{"type":"refusal","category":null,"explanation":"x"},"usage":{"input_tokens":10,"output_tokens":0}}

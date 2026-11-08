@@ -1,0 +1,1 @@
+{"id":"msg_01","type":"message","role":"assistant","model":"claude-haiku-5-5","content":[{"type":"text","text":"{\"titles\":[\"Тёмный рыцарь\",\"The Dark Knight\"],\"year\":2008,\"kind\":\"Movie\",\"season\":null,\"episodes\":[],\"absoluteEpisode\":null}"}],"stop_reason":"end_turn","stop_details":null,"usage":{"input_tokens":310,"output_tokens":42}}

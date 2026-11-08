@@ -76,7 +76,7 @@ Jellyfin scan ──► Provider (Movie/Series/Season/Episode)
 - **Поиск поэтапный, обогащение — по ID**: поиск во всех источниках сразу сжёг бы квоты (Кинопоиск — суточная, OMDb — 1000/день) на большой библиотеке. Поиск идёт до первого уверенного совпадения, остальное догружается точечно по ID.
 - **Парсер — чистая детерминированная функция** (`path, maxYear → ParsedRelease`): один класс с приватными методами + словари токенов, без отдельных классов правил.
 - **Консервативное сопоставление**: лучше не найти ничего (пользователь сделает «Identify»), чем подставить неверный фильм. Порог настраивается.
-- **ИИ — только подсказчик, а не источник истины**: LLM возвращает разобранные поля (названия, год, тип, сезон/серия) в строгом JSON; совпадение подтверждается поиском в источниках с тем же порогом. ID от ИИ игнорируются. Вызов только в фоллбэке. Подключается к pipeline через nullable-хук, поэтому реализуется последним. Два клиента: Anthropic (Claude) и OpenAI-совместимый (OpenAI, Ollama, LM Studio — локальный режим без отправки имён файлов наружу).
+- **ИИ — только подсказчик, а не источник истины**: LLM возвращает разобранные поля (названия, год, тип, сезон/серия) в строгом JSON; совпадение подтверждается поиском в источниках с тем же порогом. ID от ИИ игнорируются. Вызов только в фоллбэке. Подключается к pipeline через nullable-хук, поэтому реализуется последним. Два клиента (raw HTTP, без SDK): Anthropic (Claude, structured outputs) и OpenAI-совместимый (OpenAI, Ollama, LM Studio — локальный режим без отправки имён файлов наружу).
 - **Конфигурация читается на каждом вызове** через `IPluginConfigurationAccessor` — ключи и флажки меняются на лету со страницы настроек; тесты подставляют фиксированный объект.
 - **Без лишних зависимостей**: только то, что есть в .NET/Jellyfin (без Polly, без сторонних JSON/HTTP-библиотек; `System.Text.Json`). Сборки хоста не копируются в плагин.
 
@@ -170,7 +170,7 @@ public sealed record ParsedRelease
 ### ИИ-фоллбэк (`AiReleaseRecognizer`)
 - вход: имя файла + до двух родительских папок (не полный путь)
 - выход: строгий JSON по схеме `{titles[], year?, kind, season?, episodes[], absoluteEpisode?}`
-- Anthropic: Messages API, принудительный tool use со схемой; OpenAI-совместимый: `response_format: json_schema`
+- Anthropic: Messages API (`anthropic-version: 2026-10-21`) со structured outputs `output_config.format: json_schema` (⚠️ не принудительный tool use: Claude Opus 5.5 / Sonnet 5.5 / Fable 5.1 отвечают 400 на `tool_choice` any/tool), `effort: low`; ответ с `stop_reason` ≠ `end_turn` (refusal, max_tokens) → нет подсказки. OpenAI-совместимый: `response_format: json_schema`
 - `AiStateStore`: кэш ответов (по нормализованному пути, ≥ 7 дней) и суточный счётчик запросов хранятся в JSON-файле в папке данных плагина — переживают перезапуск сервера; таймаут запроса 15 с
 - ⚠️ приватность: при облачном провайдере имена файлов уходят во внешний сервис — предупреждение на странице настроек
 
@@ -469,13 +469,12 @@ public sealed record ParsedRelease
 - Create: `src/Jellyfin.Plugin.SmartRecognizer/Ai/OpenAiCompatibleLlmClient.cs`
 - Modify: `src/Jellyfin.Plugin.SmartRecognizer/PluginServiceRegistrator.cs`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/ai/*.json`
-- Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Ai/AnthropicLlmClientTests.cs`
-- Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Ai/OpenAiCompatibleLlmClientTests.cs`
+- Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Ai/LlmClientTests.cs`
 
-- [ ] write tests first (фейковый handler): Anthropic — запрос содержит tool со схемой и принудительный `tool_choice`, ответ `tool_use` → JSON; OpenAI-совместимый — запрос содержит `response_format: json_schema`, ответ → JSON; ключ передаётся в правильном заголовке; без ключа (локальная модель) заголовок не отправляется
-- [ ] write tests for edge cases: таймаут 15 с, 429/5xx, ответ без tool_use / пустой content → null, ключ не попадает в логи
-- [ ] реализовать `ILlmClient` (`Task<JsonDocument?> ExtractAsync(prompt, schema, ct)`) и обе реализации; выбор реализации по `AiProvider`; зарегистрировать в DI
-- [ ] run tests - must pass before task 22
+- [x] write tests first (фейковый handler): Anthropic — запрос содержит `output_config.format` со схемой (⚠️ вместо принудительного `tool_choice`, см. Technical Details), ответ `text` → JSON; OpenAI-совместимый — запрос содержит `response_format: json_schema`, ответ → JSON; ключ передаётся в правильном заголовке; без ключа (локальная модель) заголовок не отправляется
+- [x] write tests for edge cases: таймаут 15 с, 429/5xx, refusal / max_tokens / пустой content / не-JSON → null, ключ не попадает в логи
+- [x] реализовать `ILlmClient` (`Task<JsonDocument?> ExtractAsync(instructions, input, schema, ct)`) и обе реализации (raw HTTP без SDK — плагин не тащит лишние DLL); выбор реализации по `AiProvider` на каждом вызове (`ConfiguredLlmClient`); зарегистрировать в DI
+- [x] run tests - must pass before task 22
 
 ### Task 22: AI fallback recognizer plugged into the pipeline
 
