@@ -1,0 +1,11 @@
+{"docs":[
+ {"id":111543,"name":"Тёмный рыцарь","alternativeName":"The Dark Knight","enName":null,"type":"movie","year":2008,"isSeries":false,
+  "names":[{"name":"Тёмный рыцарь"},{"name":"The Dark Knight"},{"name":"Batman: The Dark Knight","language":"US"}],
+  "externalId":{"imdb":"tt0468569","tmdb":155},"rating":{"kp":8.5,"imdb":9.0},"poster":{"url":"https://image.openmoviedb.com/kp/111543.jpg","previewUrl":"https://image.openmoviedb.com/kp/111543_small.jpg"},
+  "shortDescription":"Бэтмен против Джокера"},
+ {"id":404900,"name":"Во все тяжкие","alternativeName":"Breaking Bad","type":"tv-series","year":2008,"isSeries":true},
+ {"id":1,"name":"Аватар: Легенда об Аанге","alternativeName":"Avatar: The Last Airbender","type":"animated-series","year":2005},
+ {"id":2,"name":"Унесённые призраками","alternativeName":"Sen to Chihiro no kamikakushi","type":"anime","year":2001,"isSeries":false},
+ {"id":3,"name":"Атака титанов","alternativeName":"Shingeki no kyojin","type":"anime","year":2013,"isSeries":true},
+ {"id":4,"name":"Шрэк","alternativeName":"Shrek","type":"cartoon","year":2001}
+],"total":6,"limit":10,"page":1}

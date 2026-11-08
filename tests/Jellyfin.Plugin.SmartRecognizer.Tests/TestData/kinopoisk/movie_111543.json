@@ -1,0 +1,12 @@
+{"id":111543,"externalId":{"imdb":"tt0468569","tmdb":155,"kpHD":null},"name":"Тёмный рыцарь","alternativeName":"The Dark Knight","enName":null,
+ "type":"movie","year":2008,"description":"Бэтмен поднимает ставки в войне с криминалом. С помощью лейтенанта Джима Гордона и прокурора Харви Дента он намерен очистить улицы от преступности.",
+ "slogan":"«Добро пожаловать в мир Хаоса!»","rating":{"kp":8.519,"imdb":9.0,"filmCritics":8.1},"ageRating":16,"ratingMpaa":"pg13","movieLength":152,
+ "genres":[{"name":"фантастика"},{"name":"боевик"}],"countries":[{"name":"США"}],
+ "premiere":{"world":"2008-07-14T00:00:00.000Z","russia":"2008-08-14T00:00:00.000Z"},
+ "productionCompanies":[{"name":"Warner Bros."},{"name":"Legendary Pictures"}],
+ "persons":[{"id":21495,"photo":"https://st.kp.yandex.net/images/actor_iphone/iphone360_21495.jpg","name":"Кристиан Бэйл","enName":"Christian Bale","description":"Bruce Wayne / Batman","profession":"актеры","enProfession":"actor"},
+            {"id":21459,"name":"Кристофер Нолан","enName":"Christopher Nolan","profession":"режиссеры","enProfession":"director"},
+            {"id":1,"name":null,"enName":"Hans Zimmer","enProfession":"composer"},
+            {"id":2,"name":"Монтажёр","enProfession":"editor"}],
+ "poster":{"url":"https://image.openmoviedb.com/kp/poster.jpg"},"backdrop":{"url":"https://image.openmoviedb.com/kp/backdrop.jpg"},"logo":{"url":null},
+ "isSeries":false}

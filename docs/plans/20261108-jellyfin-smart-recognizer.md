@@ -319,10 +319,10 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/kinopoisk/*.json`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Sources/KinopoiskSourceTests.cs`
 
-- [ ] write tests first: поиск по русскому названию; маппинг `type` (movie/tv-series/cartoon/anime/animated-series) в `MediaKind`; `externalId` → imdb/tmdb; рейтинги kp/imdb; альтернативные названия (`alternativeName`, `names[]`)
-- [ ] write tests for edge cases: исчерпана суточная квота (403/429) → источник выключен до конца суток без повторов; сериал без данных о сериях
-- [ ] реализовать `KinopoiskSource : IMetadataSource` (`X-API-KEY`, `selectFields`); зарегистрировать в DI
-- [ ] run tests - must pass before task 11
+- [x] write tests first: поиск по русскому названию; маппинг `type` (movie/tv-series/cartoon/anime/animated-series) в `MediaKind`; `externalId` → imdb/tmdb; рейтинги kp/imdb; альтернативные названия (`alternativeName`, `names[]`)
+- [x] write tests for edge cases: исчерпана суточная квота (403/429) → источник выключен до конца суток без повторов; сериал без данных о сериях
+- [x] реализовать `KinopoiskSource : IMetadataSource` (`X-API-KEY`; ⚠️ `selectFields` не используется: квота считается по запросам, а не по объёму ответа); зарегистрировать в DI
+- [x] run tests - must pass before task 11
 
 ### Task 11: OMDb source client
 
