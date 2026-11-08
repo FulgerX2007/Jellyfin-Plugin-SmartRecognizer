@@ -61,6 +61,52 @@ public sealed partial class ReleaseNameParser
         }
 
         var name = StripVideoExtension(segments[^1]);
+        var parents = segments.Take(segments.Count - 1).ToList();
+
+        // The path itself is a season folder: "Show/Сезон 2/".
+        if (TryParseSeasonFolder(name, out var ownSeason))
+        {
+            var show = parents.Count > 0 ? ParseSeriesName(parents[^1], maxYear) : ParsedRelease.Empty;
+            return show with
+            {
+                Kind = show.Titles.Count > 0 ? MediaKind.Series : MediaKind.Unknown,
+                Season = ownSeason,
+            };
+        }
+
+        var folderSeason = (int?)null;
+        if (parents.Count > 0 && TryParseSeasonFolder(parents[^1], out var parsedFolderSeason))
+        {
+            folderSeason = parsedFolderSeason;
+            parents.RemoveAt(parents.Count - 1);
+        }
+
+        var flat = Flatten(name);
+        var marker = FindEpisodeMarker(flat, allowBareNumber: folderSeason.HasValue);
+        if (marker is not null)
+        {
+            var seriesFolder = parents.Count > 0 ? parents[^1] : null;
+            return BuildEpisode(flat, marker, folderSeason, seriesFolder, maxYear);
+        }
+
+        var pack = SeasonPhraseRegex().Match(flat);
+        if (pack.Success)
+        {
+            var show = ParseName(flat[..pack.Index], maxYear);
+            var quality = ParseName(flat.Remove(pack.Index, pack.Length), maxYear);
+            return WithQuality(show, quality) with
+            {
+                Kind = show.Titles.Count > 0 ? MediaKind.Series : MediaKind.Unknown,
+                Season = ParseNumber(pack.Groups["s"].Value),
+            };
+        }
+
+        if (BareNumberRegex().IsMatch(flat))
+        {
+            // "05.mkv" without a season folder: could be anything.
+            return ParsedRelease.Empty;
+        }
+
         return ParseName(name, maxYear);
     }
 
@@ -95,6 +141,133 @@ public sealed partial class ReleaseNameParser
                 .Distinct(StringComparer.Ordinal)
                 .ToList(),
         };
+    }
+
+    private static ParsedRelease BuildEpisode(string flat, EpisodeMarker marker, int? folderSeason, string? seriesFolder, int maxYear)
+    {
+        var prefix = flat[..marker.Index];
+        var season = marker.Season;
+        var phrase = SeasonPhraseRegex().Match(prefix);
+        if (phrase.Success)
+        {
+            season ??= ParseNumber(phrase.Groups["s"].Value);
+            prefix = prefix[..phrase.Index];
+        }
+
+        season ??= folderSeason;
+
+        var own = ParseName(prefix, maxYear);
+        var show = own.Titles.Count == 0 && seriesFolder is not null ? ParseSeriesName(seriesFolder, maxYear) : own;
+        var quality = ParseName(flat.Remove(marker.Index, marker.Length), maxYear);
+        var year = own.Year ?? (seriesFolder is not null ? ParseSeriesName(seriesFolder, maxYear).Year : null);
+
+        return WithQuality(show, quality) with
+        {
+            Kind = MediaKind.Episode,
+            Year = year,
+            Season = season,
+            Episodes = marker.Episodes,
+            AbsoluteEpisode = marker.Absolute,
+        };
+    }
+
+    /// <summary>Parses a series folder name: everything before a season phrase is the title.</summary>
+    private static ParsedRelease ParseSeriesName(string folder, int maxYear)
+    {
+        var flat = Flatten(folder);
+        var phrase = SeasonPhraseRegex().Match(flat);
+        return ParseName(phrase.Success ? flat[..phrase.Index] : flat, maxYear);
+    }
+
+    private static ParsedRelease WithQuality(ParsedRelease target, ParsedRelease quality) => target with
+    {
+        ReleaseGroup = target.ReleaseGroup ?? quality.ReleaseGroup,
+        Resolution = target.Resolution ?? quality.Resolution,
+        Source = target.Source ?? quality.Source,
+        AudioTags = target.AudioTags.Concat(quality.AudioTags).Distinct(StringComparer.Ordinal).ToList(),
+    };
+
+    private static bool TryParseSeasonFolder(string name, out int season)
+    {
+        var flat = Flatten(name).Trim();
+        if (SpecialsFolderRegex().IsMatch(flat))
+        {
+            season = 0;
+            return true;
+        }
+
+        var match = SeasonFolderRegex().Match(flat);
+        season = match.Success ? ParseNumber(match.Groups["s"].Value) : 0;
+        return match.Success;
+    }
+
+    private static EpisodeMarker? FindEpisodeMarker(string flat, bool allowBareNumber)
+    {
+        var m = SxxEyyRegex().Match(flat);
+        if (m.Success)
+        {
+            return new EpisodeMarker(m.Index, m.Length, ParseNumber(m.Groups["s"].Value), ExpandEpisodes(m), null);
+        }
+
+        foreach (var regex in (Regex[])[SeasonEpisodeWordsRegex(), NxMRegex()])
+        {
+            m = regex.Match(flat);
+            if (m.Success)
+            {
+                return new EpisodeMarker(m.Index, m.Length, ParseNumber(m.Groups["s"].Value), [ParseNumber(m.Groups["e"].Value)], null);
+            }
+        }
+
+        foreach (var regex in (Regex[])[RussianEpisodeAfterRegex(), RussianEpisodeBeforeRegex(), EpisodeWordRegex()])
+        {
+            m = regex.Match(flat);
+            if (m.Success)
+            {
+                return new EpisodeMarker(m.Index, m.Length, null, [ParseNumber(m.Groups["e"].Value)], null);
+            }
+        }
+
+        m = BareNumberRegex().Match(flat);
+        if (allowBareNumber && m.Success)
+        {
+            return new EpisodeMarker(m.Index, m.Length, null, [ParseNumber(m.Groups["e"].Value)], null);
+        }
+
+        return null;
+    }
+
+    /// <summary>"E01E02" lists episodes; "E01-E03" is a range. A reversed range keeps the first one.</summary>
+    private static List<int> ExpandEpisodes(Match m)
+    {
+        var first = ParseNumber(m.Groups["e"].Value);
+        var episodes = new List<int> { first };
+        foreach (Capture extra in m.Groups["more"].Captures)
+        {
+            var text = extra.Value;
+            var number = ParseNumber(text.TrimStart('-', 'E', 'e'));
+            if (text.StartsWith('-'))
+            {
+                for (var n = episodes[^1] + 1; n <= number; n++)
+                {
+                    episodes.Add(n);
+                }
+            }
+            else if (number > episodes[^1])
+            {
+                episodes.Add(number);
+            }
+        }
+
+        return episodes;
+    }
+
+    private static int ParseNumber(string text) => int.Parse(text, NumberStyles.None, CultureInfo.InvariantCulture);
+
+    /// <summary>"S.W.A.T." → "SWAT", then dots and underscores become spaces.</summary>
+    private static string Flatten(string name)
+    {
+        name = AcronymRegex().Replace(name, m => m.Value.Replace(".", string.Empty, StringComparison.Ordinal) + " ");
+        return name.Replace('.', ' ').Replace('_', ' ');
     }
 
     private static List<string> SplitPath(string? path)
@@ -150,9 +323,7 @@ public sealed partial class ReleaseNameParser
 
     private static List<Token> Tokenize(string name)
     {
-        // "S.W.A.T." → "SWAT " before dots become separators.
-        name = AcronymRegex().Replace(name, m => m.Value.Replace(".", string.Empty, StringComparison.Ordinal) + " ");
-        name = name.Replace('.', ' ').Replace('_', ' ');
+        name = Flatten(name);
 
         var tokens = new List<Token>();
         var groupId = 0;
@@ -384,6 +555,40 @@ public sealed partial class ReleaseNameParser
         return result;
     }
 
+    private const string NotWord = @"(?<![\p{L}\p{N}])";
+
+    [GeneratedRegex(NotWord + @"S(?<s>\d{1,2})\s?E(?<e>\d{1,4})(?<more>-?E\d{1,4}|-\d{1,4})*(?!\d)", RegexOptions.IgnoreCase)]
+    private static partial Regex SxxEyyRegex();
+
+    [GeneratedRegex(NotWord + @"(?:season|сезон)\s?(?<s>\d{1,2})\s?(?:episode|серия|эпизод)\s?(?<e>\d{1,4})(?!\d)", RegexOptions.IgnoreCase)]
+    private static partial Regex SeasonEpisodeWordsRegex();
+
+    [GeneratedRegex(NotWord + @"(?<s>\d{1,2})x(?<e>\d{1,3})(?![\p{L}\p{N}])", RegexOptions.IgnoreCase)]
+    private static partial Regex NxMRegex();
+
+    [GeneratedRegex(NotWord + @"(?:серия|эпизод)\s?(?<e>\d{1,4})(?!\d)", RegexOptions.IgnoreCase)]
+    private static partial Regex RussianEpisodeAfterRegex();
+
+    [GeneratedRegex(NotWord + @"(?<e>\d{1,4})(?:-?я)?\s?(?:серия|эпизод)(?!\p{L})", RegexOptions.IgnoreCase)]
+    private static partial Regex RussianEpisodeBeforeRegex();
+
+    [GeneratedRegex(NotWord + @"(?:episode|ep|e)\s?(?<e>\d{1,4})(?![\p{L}\p{N}])", RegexOptions.IgnoreCase)]
+    private static partial Regex EpisodeWordRegex();
+
+    [GeneratedRegex(@"^\s*(?<e>\d{1,4})\s*$")]
+    private static partial Regex BareNumberRegex();
+
+    /// <summary>A season phrase inside a name: "S01", "Season 2", "Сезон 2", "2 сезон", "2nd Season".</summary>
+    [GeneratedRegex(NotWord + @"(?:S(?<s>\d{1,2})(?![\p{L}\p{N}])|(?:season|сезон)\s?(?<s>\d{1,2})(?!\d)|(?<s>\d{1,2})(?:st|nd|rd|th|-?й|-?ый)?\s?(?:season|сезон)(?!\p{L}))", RegexOptions.IgnoreCase)]
+    private static partial Regex SeasonPhraseRegex();
+
+    /// <summary>A whole folder name that is a season: "Season 02", "Сезон 2 (2019)", "2 сезон", "S02".</summary>
+    [GeneratedRegex(@"^(?:(?:season|сезон|series|s)\s?(?<s>\d{1,3})|(?<s>\d{1,2})(?:st|nd|rd|th|-?й|-?ый)?\s?(?:season|сезон))(?:\s.*)?$", RegexOptions.IgnoreCase)]
+    private static partial Regex SeasonFolderRegex();
+
+    [GeneratedRegex(@"^(?:specials?|спецвыпуски|спешлы|extras)$", RegexOptions.IgnoreCase)]
+    private static partial Regex SpecialsFolderRegex();
+
     [GeneratedRegex(@"^[A-Za-z]:$")]
     private static partial Regex DriveRegex();
 
@@ -397,6 +602,8 @@ public sealed partial class ReleaseNameParser
     private static partial Regex TokenRegex();
 
     private readonly record struct Token(string Text, Bracket Bracket, int Group);
+
+    private sealed record EpisodeMarker(int Index, int Length, int? Season, List<int> Episodes, int? Absolute);
 
     private sealed class Run(Script script)
     {

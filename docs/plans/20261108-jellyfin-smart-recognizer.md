@@ -249,10 +249,10 @@ public sealed record ParsedRelease
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/release-names.json`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Parsing/EpisodeNumberingTests.cs`
 
-- [ ] write tests first: `Show.S01E02.WEB-DL`, `S01E01-E02`, `S01E01E02`, `1x05`, `Серия 3`, `3 серия`, `03.mkv` в папке `Сезон 2`, `Season 02/E05`, `2 сезон/05 серия`, specials `S00E01`; название сериала — из папки сериала, если в имени файла его нет; папка сериала без файла → `Kind = Series`
-- [ ] write tests for edge cases: фильм с числом в названии не становится серией (`Ocean's 11`, `Брат 2`), конфликт сезона в папке и в имени (имя файла приоритетнее), неоднозначность → `Kind = Unknown`
-- [ ] реализовать нумерацию и сезон из папки (до двух уровней родителей)
-- [ ] run tests - must pass before task 6
+- [x] write tests first: `Show.S01E02.WEB-DL`, `S01E01-E02`, `S01E01E02`, `1x05`, `Серия 3`, `3 серия`, `03.mkv` в папке `Сезон 2`, `Season 02/E05`, `2 сезон/05 серия`, specials `S00E01`; название сериала — из папки сериала, если в имени файла его нет; папка сериала без файла → `Kind = Series` (⚠️ по имени папку сериала не отличить от папки фильма, поэтому `Series` — только для папки сезона и сезонного пака `Show.S01.1080p`; в остальных случаях тип задаёт провайдер)
+- [x] write tests for edge cases: фильм с числом в названии не становится серией (`Ocean's 11`, `Брат 2`), конфликт сезона в папке и в имени (имя файла приоритетнее), неоднозначность → `Kind = Unknown`
+- [x] реализовать нумерацию и сезон из папки (до двух уровней родителей)
+- [x] run tests - must pass before task 6
 
 ### Task 6: Parser — anime names and absolute numbering
 
