@@ -224,10 +224,10 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/release-names.json`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Parsing/ReleaseNameParserTests.cs`
 
-- [ ] write tests first: корпус ≥ 20 scene-имён фильмов (`The.Dark.Knight.2008.1080p.BluRay.x264-GROUP`, `Movie_Name_2019_WEB-DL`, `1917.2019.mkv`, `2012.2009.BDRip`, без года); ожидаются Titles, Year, Kind, Resolution, Source, ReleaseGroup; пути с `/` и с `\`
-- [ ] write tests for edge cases: пустая строка, только расширение, путь без файла, `1080` не год, год > `maxYear` или < 1900 не год (через фиксированный `maxYear`)
-- [ ] реализовать `MediaKind`, `ParsedRelease`, словари токенов качества/источника/кодеков, очистку и извлечение года (приватные методы `ReleaseNameParser`)
-- [ ] run tests - must pass before task 4
+- [x] write tests first: корпус ≥ 20 scene-имён фильмов (`The.Dark.Knight.2008.1080p.BluRay.x264-GROUP`, `Movie_Name_2019_WEB-DL`, `1917.2019.mkv`, `2012.2009.BDRip`, без года); ожидаются Titles, Year, Kind, Resolution, Source, ReleaseGroup; пути с `/` и с `\`
+- [x] write tests for edge cases: пустая строка, только расширение, путь без файла, `1080` не год, год > `maxYear` или < 1900 не год (через фиксированный `maxYear`)
+- [x] реализовать `MediaKind`, `ParsedRelease`, словари токенов качества/источника/кодеков, очистку и извлечение года (приватные методы `ReleaseNameParser`)
+- [x] run tests - must pass before task 4
 
 ### Task 4: Parser — Russian release names
 
