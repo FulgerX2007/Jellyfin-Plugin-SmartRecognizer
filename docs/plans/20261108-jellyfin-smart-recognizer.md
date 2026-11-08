@@ -387,11 +387,11 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Matching/RecognitionPipelineTests.cs`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/DependencyInjectionTests.cs`
 
-- [ ] write tests first: известные `ProviderIds` → поиск пропускается; путь → парсер → resolver → **догрузка деталей по ID** во всех включённых источниках параллельно (OMDb — по imdb ID, серии — через `IEpisodeSource`) → merger
-- [ ] write tests for edge cases: детали одного источника упали — остальные сливаются; нет совпадения → пустой результат; nullable-хук фоллбэка (`IReleaseFallback?`) вызывается только при отсутствии совпадения, его подсказка идёт через тот же resolver и порог
-- [ ] write DI wiring test: `ServiceCollection` + `PluginServiceRegistrator` → все зарегистрированные сервисы создаются (провайдеры добавят себя в этот тест в задачах 16–19)
-- [ ] реализовать `RecognitionPipeline`; зарегистрировать в DI
-- [ ] run tests - must pass before task 16
+- [x] write tests first: известные `ProviderIds` → поиск пропускается; путь → парсер → resolver → **догрузка деталей по ID** во всех включённых источниках параллельно (OMDb — по imdb ID, серии — через `IEpisodeSource`) → merger
+- [x] write tests for edge cases: детали одного источника упали — остальные сливаются; нет совпадения → пустой результат; nullable-хук фоллбэка (`IReleaseFallback?`) вызывается только при отсутствии совпадения, его подсказка идёт через тот же resolver и порог
+- [x] write DI wiring test: `ServiceCollection` + `PluginServiceRegistrator` → все зарегистрированные сервисы создаются (провайдеры добавят себя в этот тест в задачах 16–19)
+- [x] реализовать `RecognitionPipeline`; зарегистрировать в DI
+- [x] run tests - must pass before task 16
 
 ### Task 16: Movie metadata provider + early smoke test
 
