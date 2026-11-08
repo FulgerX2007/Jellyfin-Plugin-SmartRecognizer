@@ -261,10 +261,10 @@ public sealed record ParsedRelease
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/release-names.json`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Parsing/AnimeNamesTests.cs`
 
-- [ ] write tests first: `[SubsPlease] Title - 05 (1080p) [ABCD1234].mkv`, `[Group] Title - 105v2`, `Title - 05 [BD 1080p]`, `Title S2 - 03`, `Title 2nd Season - 03`, `Title - 05.5` (спешл), батч-папка `[Group] Title (01-12)`
-- [ ] write tests for edge cases: CRC-хэш и `v2` не попадают в название/номер, `- 2019` не серия, аниме с `SxxEyy` использует явный сезон
-- [ ] реализовать: группа релиза из ведущих `[]`, `AbsoluteEpisode`, сезон из `S2`/`2nd Season`
-- [ ] run tests - must pass before task 7
+- [x] write tests first: `[SubsPlease] Title - 05 (1080p) [ABCD1234].mkv`, `[Group] Title - 105v2`, `Title - 05 [BD 1080p]`, `Title S2 - 03`, `Title 2nd Season - 03`, `Title - 05.5` (спешл), батч-папка `[Group] Title (01-12)`
+- [x] write tests for edge cases: CRC-хэш и `v2` не попадают в название/номер, `- 2019` не серия, аниме с `SxxEyy` использует явный сезон
+- [x] реализовать: группа релиза из ведущих `[]`, `AbsoluteEpisode`, сезон из `S2`/`2nd Season`
+- [x] run tests - must pass before task 7
 
 ### Task 7: Title normalization and match scoring
 

@@ -60,8 +60,15 @@ public sealed partial class ReleaseNameParser
             return ParsedRelease.Empty;
         }
 
-        var name = StripVideoExtension(segments[^1]);
+        var name = CrcRegex().Replace(StripVideoExtension(segments[^1]), " ");
+        var leadingGroup = ExtractLeadingGroup(ref name);
         var parents = segments.Take(segments.Count - 1).ToList();
+        var result = ParseSegments(name, parents, maxYear);
+        return leadingGroup is null ? result : result with { ReleaseGroup = leadingGroup };
+    }
+
+    private static ParsedRelease ParseSegments(string name, List<string> parents, int maxYear)
+    {
 
         // The path itself is a season folder: "Show/Сезон 2/".
         if (TryParseSeasonFolder(name, out var ownSeason))
@@ -82,11 +89,27 @@ public sealed partial class ReleaseNameParser
         }
 
         var flat = Flatten(name);
+        var seriesFolder = parents.Count > 0 ? parents[^1] : null;
         var marker = FindEpisodeMarker(flat, allowBareNumber: folderSeason.HasValue);
         if (marker is not null)
         {
-            var seriesFolder = parents.Count > 0 ? parents[^1] : null;
             return BuildEpisode(flat, marker, folderSeason, seriesFolder, maxYear);
+        }
+
+        // Anime "Title - 05": dots are kept so "05.5" (a special) survives.
+        var spaced = name.Replace('_', ' ');
+        var anime = FindAnimeMarker(spaced, maxYear);
+        if (anime is not null)
+        {
+            return BuildEpisode(spaced, anime, folderSeason, seriesFolder, maxYear);
+        }
+
+        // Anime batch folder: "Title (01-28)".
+        var batch = BatchRangeRegex().Match(name);
+        if (batch.Success)
+        {
+            var show = ParseName(name.Remove(batch.Index, batch.Length), maxYear);
+            return show with { Kind = show.Titles.Count > 0 ? MediaKind.Series : MediaKind.Unknown };
         }
 
         var pack = SeasonPhraseRegex().Match(flat);
@@ -147,11 +170,20 @@ public sealed partial class ReleaseNameParser
     {
         var prefix = flat[..marker.Index];
         var season = marker.Season;
+        var episodes = marker.Episodes;
+        var absolute = marker.Absolute;
         var phrase = SeasonPhraseRegex().Match(prefix);
         if (phrase.Success)
         {
             season ??= ParseNumber(phrase.Groups["s"].Value);
             prefix = prefix[..phrase.Index];
+
+            // "Title S2 - 03": the number counts within the named season.
+            if (absolute is not null)
+            {
+                episodes = [absolute.Value];
+                absolute = null;
+            }
         }
 
         season ??= folderSeason;
@@ -166,8 +198,8 @@ public sealed partial class ReleaseNameParser
             Kind = MediaKind.Episode,
             Year = year,
             Season = season,
-            Episodes = marker.Episodes,
-            AbsoluteEpisode = marker.Absolute,
+            Episodes = episodes,
+            AbsoluteEpisode = absolute,
         };
     }
 
@@ -234,6 +266,48 @@ public sealed partial class ReleaseNameParser
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Anime numbering "Title - 05", "- 105v2", "- 05.5" (special). A 4-digit year is not an episode.
+    /// </summary>
+    private static EpisodeMarker? FindAnimeMarker(string spaced, int maxYear)
+    {
+        var m = AnimeEpisodeRegex().Match(spaced);
+        if (!m.Success || IsYear(m.Groups["e"].Value, maxYear))
+        {
+            return null;
+        }
+
+        return m.Groups["half"].Success
+            ? new EpisodeMarker(m.Index, m.Length, 0, [], null)
+            : new EpisodeMarker(m.Index, m.Length, null, [], ParseNumber(m.Groups["e"].Value));
+    }
+
+    /// <summary>
+    /// "[SubsPlease] Title …": a leading bracket is the release group unless it holds
+    /// quality info ("[1080p] Title"), which is then moved to the end so it does not hide the title.
+    /// </summary>
+    private static string? ExtractLeadingGroup(ref string name)
+    {
+        var m = LeadingBracketRegex().Match(name);
+        if (!m.Success)
+        {
+            return null;
+        }
+
+        var content = m.Groups["g"].Value.Trim();
+        var rest = m.Groups["rest"].Value;
+        var isTag = content.Split([' ', ','], StringSplitOptions.RemoveEmptyEntries)
+            .Any(t => TokenDictionaries.IsKnownToken(Clean(t)) || IsYear(t, int.MaxValue));
+        if (isTag)
+        {
+            name = rest + " [" + content + "]";
+            return null;
+        }
+
+        name = rest;
+        return content;
     }
 
     /// <summary>"E01E02" lists episodes; "E01-E03" is a range. A reversed range keeps the first one.</summary>
@@ -574,6 +648,18 @@ public sealed partial class ReleaseNameParser
 
     [GeneratedRegex(NotWord + @"(?:episode|ep|e)\s?(?<e>\d{1,4})(?![\p{L}\p{N}])", RegexOptions.IgnoreCase)]
     private static partial Regex EpisodeWordRegex();
+
+    [GeneratedRegex(@"\s-\s(?<e>\d{1,4})(?:v\d)?(?<half>\.5)?(?=\s|$|\[|\()")]
+    private static partial Regex AnimeEpisodeRegex();
+
+    [GeneratedRegex(@"[\[(][0-9A-Fa-f]{8}[\])]")]
+    private static partial Regex CrcRegex();
+
+    [GeneratedRegex(@"^\s*\[(?<g>[^\]]{1,40})\]\s*(?<rest>\S.*)$")]
+    private static partial Regex LeadingBracketRegex();
+
+    [GeneratedRegex(@"[\[(]\s?\d{1,4}\s?-\s?\d{1,4}\s?[\])]")]
+    private static partial Regex BatchRangeRegex();
 
     [GeneratedRegex(@"^\s*(?<e>\d{1,4})\s*$")]
     private static partial Regex BareNumberRegex();

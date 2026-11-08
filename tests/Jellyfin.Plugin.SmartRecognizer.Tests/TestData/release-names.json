@@ -68,5 +68,16 @@
   {"path": "TV/Show/Show Ep 05.mkv", "expected": {"titles": ["Show"], "kind": "Episode", "season": null, "episodes": [5]}},
   {"path": "Show.Name.Season.2.Episode.5.mkv", "expected": {"titles": ["Show Name"], "season": 2, "episodes": [5]}},
   {"path": "Сериалы/Кухня/Сезон 2/", "expected": {"titles": ["Кухня"], "kind": "Series", "season": 2}},
-  {"path": "Сериалы/Кухня (2012)/", "expected": {"titles": ["Кухня"], "year": 2012, "kind": "Movie"}}
+  {"path": "Сериалы/Кухня (2012)/", "expected": {"titles": ["Кухня"], "year": 2012, "kind": "Movie"}},
+  {"path": "[SubsPlease] Frieren - 05 (1080p) [ABCD1234].mkv", "expected": {"titles": ["Frieren"], "kind": "Episode", "absoluteEpisode": 5, "episodes": [], "season": null, "group": "SubsPlease", "resolution": "1080p"}},
+  {"path": "[Erai-raws] One Piece - 1105v2 [1080p].mkv", "expected": {"titles": ["One Piece"], "kind": "Episode", "absoluteEpisode": 1105, "group": "Erai-raws"}},
+  {"path": "Jujutsu Kaisen - 05 [BD 1080p].mkv", "expected": {"titles": ["Jujutsu Kaisen"], "kind": "Episode", "absoluteEpisode": 5, "resolution": "1080p", "group": null}},
+  {"path": "[Group] Spy x Family S2 - 03 [1080p].mkv", "expected": {"titles": ["Spy x Family"], "kind": "Episode", "season": 2, "episodes": [3], "absoluteEpisode": null}},
+  {"path": "[Group] Mushoku Tensei 2nd Season - 03.mkv", "expected": {"titles": ["Mushoku Tensei"], "season": 2, "episodes": [3], "absoluteEpisode": null}},
+  {"path": "[Group] Frieren - 05.5 [1080p].mkv", "expected": {"titles": ["Frieren"], "kind": "Episode", "season": 0, "episodes": [], "absoluteEpisode": null}},
+  {"path": "Аниме/[Group] Frieren (01-28) [1080p]/", "expected": {"titles": ["Frieren"], "kind": "Series", "group": "Group", "resolution": "1080p"}},
+  {"path": "[SubsPlease] Dandadan - 01 (1080p) [A1B2C3D4].mkv", "expected": {"titles": ["Dandadan"], "absoluteEpisode": 1}},
+  {"path": "[Group] Title S01E05 [1080p].mkv", "expected": {"titles": ["Title"], "season": 1, "episodes": [5], "absoluteEpisode": null, "group": "Group"}},
+  {"path": "[HorribleSubs] Shingeki no Kyojin - 25 [720p].mkv", "expected": {"titles": ["Shingeki no Kyojin"], "absoluteEpisode": 25, "resolution": "720p", "group": "HorribleSubs"}},
+  {"path": "Anime/Frieren/Season 1/[SubsPlease] Frieren - 05 (1080p).mkv", "expected": {"titles": ["Frieren"], "season": 1, "absoluteEpisode": 5}}
 ]
