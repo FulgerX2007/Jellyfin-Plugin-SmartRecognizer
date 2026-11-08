@@ -290,11 +290,11 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Sources/FakeHttpMessageHandler.cs`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Sources/SourceHttpClientTests.cs`
 
-- [ ] write tests first: повторный запрос из кэша; 429 с `Retry-After` → повтор и успех; 500 → пустой результат без исключения; отмена через `CancellationToken`; секрет не попадает в ключ кэша
-- [ ] write tests for edge cases: `Retry-After` больше 10 с → не ждём, пустой результат; битый JSON → пустой результат + лог; превышение лимита попыток; отрицательный кэш с коротким TTL; квота исчерпана → источник выключен до конца суток (через `TimeProvider`)
-- [ ] определить `IMetadataSource` (поиск, детали фильма/сериала), `IEpisodeSource` (сезон, серии, absolute-порядок), общие модели с внешними ID
-- [ ] реализовать `SourceHttpClient` (кэш, лимитер, retry), регистрацию `HttpClient` в DI
-- [ ] run tests - must pass before task 9
+- [x] write tests first: повторный запрос из кэша; 429 с `Retry-After` → повтор и успех; 500 → пустой результат без исключения; отмена через `CancellationToken`; секрет не попадает в ключ кэша
+- [x] write tests for edge cases: `Retry-After` больше 10 с → не ждём, пустой результат; битый JSON → пустой результат + лог; превышение лимита попыток; отрицательный кэш с коротким TTL; квота исчерпана → источник выключен до конца суток (через `TimeProvider`)
+- [x] определить `IMetadataSource` (поиск, детали фильма/сериала), `IEpisodeSource` (сезон, серии, absolute-порядок), общие модели с внешними ID
+- [x] реализовать `SourceHttpClient` (кэш, лимитер, retry), регистрацию `HttpClient` в DI
+- [x] run tests - must pass before task 9
 
 ### Task 9: TMDb source client
 
