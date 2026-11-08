@@ -1,0 +1,9 @@
+{"id":155,"imdb_id":"tt0468569","title":"Тёмный рыцарь","original_title":"The Dark Knight","overview":"Бэтмен поднимает ставки в войне с криминалом.","tagline":"Добро пожаловать в мир Хаоса!","release_date":"2008-07-16","runtime":152,"vote_average":8.5,"vote_count":33000,
+ "genres":[{"id":18,"name":"драма"},{"id":28,"name":"боевик"}],
+ "production_companies":[{"id":923,"name":"Legendary Pictures"},{"id":6194,"name":"Warner Bros. Pictures"}],
+ "external_ids":{"imdb_id":"tt0468569"},
+ "credits":{"cast":[{"name":"Christian Bale","character":"Bruce Wayne","order":0,"profile_path":"/bale.jpg"},{"name":"Heath Ledger","character":"Joker","order":1,"profile_path":null}],
+            "crew":[{"name":"Christopher Nolan","job":"Director","department":"Directing"},{"name":"Jonathan Nolan","job":"Screenplay","department":"Writing"},{"name":"Hans Zimmer","job":"Original Music Composer","department":"Sound"},{"name":"Emma Thomas","job":"Producer","department":"Production"},{"name":"Someone","job":"Gaffer","department":"Lighting"}]},
+ "images":{"posters":[{"file_path":"/ru_poster.jpg","iso_639_1":"ru","width":2000,"height":3000,"vote_average":5.3},{"file_path":"/en_poster.jpg","iso_639_1":"en","width":1000,"height":1500,"vote_average":5.6}],
+           "backdrops":[{"file_path":"/backdrop.jpg","iso_639_1":null,"width":3840,"height":2160,"vote_average":5.4}],
+           "logos":[{"file_path":"/logo.png","iso_639_1":"en","width":500,"height":200}]}}

@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using Jellyfin.Plugin.SmartRecognizer.Configuration;
 using Jellyfin.Plugin.SmartRecognizer.Sources;
+using Jellyfin.Plugin.SmartRecognizer.Sources.Tmdb;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,5 +28,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         });
         serviceCollection.AddSingleton<SourceHttpClient>();
+        serviceCollection.AddSingleton<TmdbSource>();
+        serviceCollection.AddSingleton<IMetadataSource>(sp => sp.GetRequiredService<TmdbSource>());
+        serviceCollection.AddSingleton<IEpisodeSource>(sp => sp.GetRequiredService<TmdbSource>());
     }
 }

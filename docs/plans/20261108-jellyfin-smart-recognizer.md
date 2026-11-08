@@ -305,10 +305,10 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/tmdb/*.json`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Sources/TmdbSourceTests.cs`
 
-- [ ] write tests first (фикстуры): поиск фильма/сериала с годом и языком, детали с `external_ids`, сезон с сериями, `find` по imdb ID, изображения
-- [ ] write tests for edge cases: пустой поиск, 401 (неверный ключ) → лог без ключа, отсутствующие поля
-- [ ] реализовать `TmdbSource : IMetadataSource, IEpisodeSource` (api_key или Bearer, язык из конфигурации, базовый URL картинок из `/configuration`); зарегистрировать в DI
-- [ ] run tests - must pass before task 10
+- [x] write tests first (фикстуры): поиск фильма/сериала с годом и языком, детали с `external_ids`, сезон с сериями, `find` по imdb ID, изображения
+- [x] write tests for edge cases: пустой поиск, 401 (неверный ключ) → лог без ключа, отсутствующие поля
+- [x] реализовать `TmdbSource : IMetadataSource, IEpisodeSource` (api_key или Bearer, язык из конфигурации, базовый URL картинок — ⚠️ константа `image.tmdb.org/t/p/original` вместо запроса `/configuration` (URL стабилен годами, минус лишний запрос)); зарегистрировать в DI
+- [x] run tests - must pass before task 10
 
 ### Task 10: Kinopoisk source client
 
