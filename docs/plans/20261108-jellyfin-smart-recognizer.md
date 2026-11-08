@@ -274,10 +274,10 @@ public sealed record ParsedRelease
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Matching/TitleNormalizerTests.cs`
 - Create: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Matching/MatchScorerTests.cs`
 
-- [ ] write tests first: нормализация (`Тёмный рыцарь` = `Темный Рыцарь`, `The Lord of the Rings: The Fellowship` vs `Lord of the Rings Fellowship`, `&`/`and`); scoring — точное совпадение + год ≈ 1.0, год ±1 и другой тип снижают
-- [ ] write tests for edge cases: пустые названия кандидата, нет года ни у кого, короткие названия (`Up`, `Он`) не дают ложных высоких совпадений
-- [ ] реализовать `TitleNormalizer` и `MatchScorer` по формуле из Technical Details
-- [ ] run tests - must pass before task 8
+- [x] write tests first: нормализация (`Тёмный рыцарь` = `Темный Рыцарь`, `The Lord of the Rings: The Fellowship` vs `Lord of the Rings Fellowship`, `&`/`and`); scoring — точное совпадение + год ≈ 1.0, год ±1 и другой тип снижают
+- [x] write tests for edge cases: пустые названия кандидата, нет года ни у кого, короткие названия (`Up`, `Он`) не дают ложных высоких совпадений
+- [x] реализовать `TitleNormalizer` и `MatchScorer` по формуле из Technical Details
+- [x] run tests - must pass before task 8
 
 ### Task 8: Source interfaces and shared HTTP layer
 
