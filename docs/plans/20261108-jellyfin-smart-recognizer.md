@@ -237,10 +237,10 @@ public sealed record ParsedRelease
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/TestData/release-names.json`
 - Modify: `tests/Jellyfin.Plugin.SmartRecognizer.Tests/Parsing/ReleaseNameParserTests.cs`
 
-- [ ] write tests first: ≥ 20 русских имён в том виде, в каком они лежат на диске — `Тёмный рыцарь (The Dark Knight) 2008 BDRip 1080p [Дубляж]`, `Темный.рыцарь.The.Dark.Knight.2008.BDRip`, `Тёмный рыцарь _ The Dark Knight (2008)`, `Тёмный рыцарь - The Dark Knight`, полноширинный `／`, `Брат 2 (2000) DVDRip`, `Иван Васильевич меняет профессию.1973.mkv`, теги `MVO/AVO/DUB/Лицензия/iTunes`
-- [ ] write tests for edge cases: скобки как часть названия, а не EN-вариант (`Мама (не) горюй`), дефис внутри названия (`Человек-паук`), `ё`/`е`, смешанные теги в `[]`
-- [ ] реализовать разделение двойного названия (скобки, смена алфавита, ` _ `, ` - `, `／`), словари русских тегов, заполнение `AudioTags`
-- [ ] run tests - must pass before task 5
+- [x] write tests first: ≥ 20 русских имён в том виде, в каком они лежат на диске — `Тёмный рыцарь (The Dark Knight) 2008 BDRip 1080p [Дубляж]`, `Темный.рыцарь.The.Dark.Knight.2008.BDRip`, `Тёмный рыцарь _ The Dark Knight (2008)`, `Тёмный рыцарь - The Dark Knight`, полноширинный `／`, `Брат 2 (2000) DVDRip`, `Иван Васильевич меняет профессию.1973.mkv`, теги `MVO/AVO/DUB/Лицензия/iTunes`
+- [x] write tests for edge cases: скобки как часть названия, а не EN-вариант (`Мама (не) горюй`), дефис внутри названия (`Человек-паук`), `ё`/`е`, смешанные теги в `[]`
+- [x] реализовать разделение двойного названия (скобки, смена алфавита, ` _ `, ` - `, `／`), словари русских тегов, заполнение `AudioTags`
+- [x] run tests - must pass before task 5
 
 ### Task 5: Parser — episode numbering and season folders
 

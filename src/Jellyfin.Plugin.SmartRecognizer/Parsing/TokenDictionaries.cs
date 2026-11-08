@@ -67,6 +67,25 @@ internal static class TokenDictionaries
         "multi", "dual", "subs", "hybrid",
     };
 
+    /// <summary>Audio/dub/release-type tag → canonical value (mostly Russian releases).</summary>
+    public static readonly Dictionary<string, string> AudioTags = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["дубляж"] = "Дубляж",
+        ["дублированный"] = "Дубляж",
+        ["dub"] = "DUB",
+        ["mvo"] = "MVO",
+        ["dvo"] = "DVO",
+        ["avo"] = "AVO",
+        ["многоголосый"] = "MVO",
+        ["двухголосый"] = "DVO",
+        ["одноголосый"] = "AVO",
+        ["лицензия"] = "Лицензия",
+        ["itunes"] = "iTunes",
+    };
+
     public static bool IsKnownToken(string token) =>
-        Resolutions.ContainsKey(token) || Sources.ContainsKey(token) || TechnicalTokens.Contains(token);
+        Resolutions.ContainsKey(token)
+        || Sources.ContainsKey(token)
+        || TechnicalTokens.Contains(token)
+        || AudioTags.ContainsKey(token);
 }

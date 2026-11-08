@@ -22,7 +22,9 @@ public sealed partial class ReleaseNameParser
         "proper", "remastered", "unrated", "uncut", "imax", "hybrid",
     };
 
-    private static readonly char[] TitleTrimChars = [' ', '-', '–', '—', ':', ',', ';', '.'];
+    private static readonly char[] TitleTrimChars = [' ', '-', '–', '—', ':', ',', ';', '.', '／', '|', '/'];
+
+    private static readonly char[] LookupTrimChars = [',', ';', ':', '!', '?'];
 
     private readonly TimeProvider _timeProvider;
 
@@ -36,6 +38,14 @@ public sealed partial class ReleaseNameParser
         None,
         Round,
         Square,
+    }
+
+    private enum Script
+    {
+        Neutral,
+        Latin,
+        Cyrillic,
+        Other,
     }
 
     /// <summary>Parses using next calendar year as the newest allowed release year.</summary>
@@ -68,20 +78,22 @@ public sealed partial class ReleaseNameParser
         var yearIndex = FindYearIndex(tokens, strongIndex, maxYear);
         var cut = MinIndex(strongIndex, yearIndex, tokens.Count);
 
-        var title = string.Join(' ', tokens.Take(cut).Where(t => t.Bracket == Bracket.None).Select(t => t.Text))
-            .Trim(TitleTrimChars);
-
-        var tail = tokens.Skip(cut).Select(t => t.Text).ToList();
-        var titles = title.Length > 0 ? new[] { title } : [];
+        var titles = BuildTitles(tokens, cut);
+        var tail = tokens.Skip(cut).Select(t => Clean(t.Text)).ToList();
 
         return new ParsedRelease
         {
             Titles = titles,
             Year = yearIndex >= 0 ? int.Parse(tokens[yearIndex].Text, CultureInfo.InvariantCulture) : null,
-            Kind = titles.Length > 0 ? MediaKind.Movie : MediaKind.Unknown,
+            Kind = titles.Count > 0 ? MediaKind.Movie : MediaKind.Unknown,
             ReleaseGroup = group,
             Resolution = FirstMapped(tail, TokenDictionaries.Resolutions),
             Source = FirstMapped(tail, TokenDictionaries.Sources),
+            AudioTags = tail
+                .Select(t => TokenDictionaries.AudioTags.GetValueOrDefault(t))
+                .OfType<string>()
+                .Distinct(StringComparer.Ordinal)
+                .ToList(),
         };
     }
 
@@ -127,7 +139,7 @@ public sealed partial class ReleaseNameParser
         }
 
         var withoutGroup = name[..match.Index];
-        if (!Tokenize(withoutGroup).Exists(t => TokenDictionaries.IsKnownToken(t.Text)))
+        if (!Tokenize(withoutGroup).Exists(t => TokenDictionaries.IsKnownToken(Clean(t.Text))))
         {
             return null;
         }
@@ -143,23 +155,161 @@ public sealed partial class ReleaseNameParser
         name = name.Replace('.', ' ').Replace('_', ' ');
 
         var tokens = new List<Token>();
+        var groupId = 0;
         foreach (Match m in TokenRegex().Matches(name))
         {
             if (m.Groups["word"].Success)
             {
-                tokens.Add(new Token(m.Value, Bracket.None));
+                tokens.Add(new Token(m.Value, Bracket.None, -1));
                 continue;
             }
 
             var bracket = m.Groups["round"].Success ? Bracket.Round : Bracket.Square;
             var inner = m.Groups[bracket == Bracket.Round ? "round" : "square"].Value;
-            foreach (var part in inner.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            groupId++;
+            foreach (var part in inner.Split([' ', ','], StringSplitOptions.RemoveEmptyEntries))
             {
-                tokens.Add(new Token(part, bracket));
+                tokens.Add(new Token(part, bracket, groupId));
             }
         }
 
         return tokens;
+    }
+
+    /// <summary>
+    /// Builds title candidates from the tokens before <paramref name="cut"/>.
+    /// A switch of alphabet splits a double title ("Темный рыцарь The Dark Knight");
+    /// round brackets in another alphabet are an alternative title ("Начало (Inception)"),
+    /// in the same alphabet they are part of the title ("Мама (не) горюй").
+    /// Square brackets before the cut are tags and are dropped.
+    /// </summary>
+    private static List<string> BuildTitles(List<Token> tokens, int cut)
+    {
+        var mainScript = tokens.Take(cut)
+            .Where(t => t.Bracket == Bracket.None)
+            .Select(t => ScriptOf(t.Text))
+            .FirstOrDefault(s => s != Script.Neutral);
+
+        var runs = new List<Run>();
+        var alternatives = new List<string>();
+        var i = 0;
+        while (i < cut)
+        {
+            var token = tokens[i];
+            if (token.Bracket == Bracket.Square)
+            {
+                i++;
+                continue;
+            }
+
+            if (token.Bracket == Bracket.Round)
+            {
+                var parts = new List<string>();
+                while (i < cut && tokens[i].Group == token.Group)
+                {
+                    parts.Add(tokens[i].Text);
+                    i++;
+                }
+
+                var content = string.Join(' ', parts);
+                var script = ScriptOf(content);
+                if (script != Script.Neutral && script != mainScript)
+                {
+                    alternatives.Add(content);
+                }
+                else
+                {
+                    AddToRuns(runs, "(" + content + ")", Script.Neutral);
+                }
+
+                continue;
+            }
+
+            AddToRuns(runs, token.Text, ScriptOf(token.Text));
+            i++;
+        }
+
+        var merged = MergeShortRuns(runs);
+        return merged.Select(r => string.Join(' ', r.Parts))
+            .Concat(alternatives)
+            .Select(t => t.Trim(TitleTrimChars))
+            .Where(t => t.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static void AddToRuns(List<Run> runs, string text, Script script)
+    {
+        var current = runs.Count > 0 ? runs[^1] : null;
+        if (current is null || (script != Script.Neutral && current.Script != Script.Neutral && script != current.Script))
+        {
+            current = new Run(Script.Neutral);
+            runs.Add(current);
+        }
+
+        current.Parts.Add(text);
+        if (current.Script == Script.Neutral && script != Script.Neutral)
+        {
+            current.Script = script;
+        }
+    }
+
+    /// <summary>
+    /// A run with fewer than two letters ("Агент Z", "Проект X") is not a separate title:
+    /// glue it to its neighbour, then join neighbouring runs of the same alphabet.
+    /// </summary>
+    private static List<Run> MergeShortRuns(List<Run> runs)
+    {
+        var result = new List<Run>();
+        foreach (var run in runs)
+        {
+            var letters = run.Parts.Sum(p => p.Count(char.IsLetter));
+            if (result.Count > 0 && (letters < 2 || run.Script == result[^1].Script || run.Script == Script.Neutral))
+            {
+                result[^1].Parts.AddRange(run.Parts);
+            }
+            else
+            {
+                result.Add(run);
+            }
+        }
+
+        // A short run at the very start ("Z Агент") was not glued above: join it to the next.
+        if (result.Count > 1 && result[0].Parts.Sum(p => p.Count(char.IsLetter)) < 2)
+        {
+            result[1].Parts.InsertRange(0, result[0].Parts);
+            result.RemoveAt(0);
+        }
+
+        return result;
+    }
+
+    private static Script ScriptOf(string text)
+    {
+        var result = Script.Neutral;
+        foreach (var c in text)
+        {
+            if (!char.IsLetter(c))
+            {
+                continue;
+            }
+
+            var script = c is >= 'Ѐ' and <= 'ӿ' ? Script.Cyrillic
+                : c < 'ɐ' ? Script.Latin
+                : Script.Other;
+
+            if (script == Script.Cyrillic)
+            {
+                return Script.Cyrillic;
+            }
+
+            if (result == Script.Neutral)
+            {
+                result = script;
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -197,8 +347,13 @@ public sealed partial class ReleaseNameParser
         && year >= MinYear
         && year <= maxYear;
 
-    private static bool IsStrongToken(string text) =>
-        TokenDictionaries.IsKnownToken(text) && !AmbiguousTokens.Contains(text);
+    private static bool IsStrongToken(string text)
+    {
+        var clean = Clean(text);
+        return TokenDictionaries.IsKnownToken(clean) && !AmbiguousTokens.Contains(clean);
+    }
+
+    private static string Clean(string token) => token.Trim(LookupTrimChars);
 
     private static string? FirstMapped(List<string> tokens, Dictionary<string, string> map)
     {
@@ -241,5 +396,12 @@ public sealed partial class ReleaseNameParser
     [GeneratedRegex(@"\[(?<square>[^\]]*)\]|\((?<round>[^)]*)\)|(?<word>[^\s\[\]()]+)")]
     private static partial Regex TokenRegex();
 
-    private readonly record struct Token(string Text, Bracket Bracket);
+    private readonly record struct Token(string Text, Bracket Bracket, int Group);
+
+    private sealed class Run(Script script)
+    {
+        public Script Script { get; set; } = script;
+
+        public List<string> Parts { get; } = [];
+    }
 }

@@ -86,4 +86,36 @@ public class ReleaseNameParserTests
         Assert.Equal(2027, parser.Parse("Film.2027.mkv").Year);
         Assert.Null(parser.Parse("Film.2028.mkv").Year);
     }
+
+    [Fact]
+    public void LatinOnlyName_StaysOneTitle()
+    {
+        var result = ReleaseNameParser.Parse("Mission - Impossible (1996).mkv", ReleaseCorpus.MaxYear);
+
+        Assert.Equal(["Mission - Impossible"], result.Titles);
+    }
+
+    [Fact]
+    public void SameScriptRoundBrackets_AreKeptInTitle()
+    {
+        var result = ReleaseNameParser.Parse("Movie (Part 2) 2001.mkv", ReleaseCorpus.MaxYear);
+
+        Assert.Equal(["Movie (Part 2)"], result.Titles);
+    }
+
+    [Fact]
+    public void SquareBracketTagsBeforeYear_AreNotTitle()
+    {
+        var result = ReleaseNameParser.Parse("Солярис [Remastered] (1972).mkv", ReleaseCorpus.MaxYear);
+
+        Assert.Equal(["Солярис"], result.Titles);
+    }
+
+    [Fact]
+    public void AudioTags_AreDeduplicated()
+    {
+        var result = ReleaseNameParser.Parse("Фильм 2010 [MVO] [mvo] BDRip.mkv", ReleaseCorpus.MaxYear);
+
+        Assert.Equal(["MVO"], result.AudioTags);
+    }
 }
