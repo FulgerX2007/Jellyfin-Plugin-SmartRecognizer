@@ -72,6 +72,12 @@ public class PluginConfiguration : BasePluginConfiguration
 
     public int CacheTtlHours { get; set; } = 24;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether season/episode numbers Jellyfin misread are corrected
+    /// from explicit markers in the file name before metadata is fetched.
+    /// </summary>
+    public bool FixEpisodeNumbers { get; set; } = true;
+
     public bool AiEnabled { get; set; }
 
     public AiProviderKind AiProvider { get; set; } = AiProviderKind.Anthropic;

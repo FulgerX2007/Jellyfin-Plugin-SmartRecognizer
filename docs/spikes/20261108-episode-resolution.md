@@ -27,3 +27,21 @@ there are no tests for it.
   revisit with a post-scan task only if it turns out to bother users.
 - Our own season-folder parsing stays (the parser needs it to number episodes), but Jellyfin
   already creates the `Season` items for `Сезон 2` / `2 сезон`.
+
+## Correction after the live smoke test (Task 23)
+
+The real Jellyfin 12.4 scan showed that answer 2 was wrong in both directions. Before calling
+remote providers, `MetadataService` seeds the temporary result with the item's current
+`ParentIndexNumber` (`temp.Item.ParentIndexNumber = item.ParentIndexNumber`) and merges each
+provider into it with `mergeMetadataSettings: false`. So:
+
+- a **season** number from a remote provider is applied only on "Replace all metadata";
+- an **episode** number from a remote provider *is* applied on a normal scan (the temp → item
+  merge replaces data in "Scan for new and updated files" mode).
+
+Result before the fix: `Сезон 2/Кухня - Серия 3.mkv`, read by Jellyfin as S7E5, became S7E3.
+
+**Fix:** `EpisodeNumberProvider` (`ICustomMetadataProvider<Episode>` + `IPreRefreshProvider`)
+corrects the item's numbers from explicit markers before the temp result is seeded, so every
+provider, built-in ones included, looks up the right episode. Verified live: the file became S2E3
+and the phantom "Season 7" disappeared. Toggle: `FixEpisodeNumbers` (on by default).

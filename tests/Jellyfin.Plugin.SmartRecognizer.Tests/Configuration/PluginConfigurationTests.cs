@@ -106,7 +106,7 @@ public class PluginConfigurationTests
         using var reader = new StreamReader(stream);
         var html = reader.ReadToEnd();
         Assert.Contains("6f1d2c7e-3b9a-4e51-9c8d-2a7f4b0e5d13", html, StringComparison.Ordinal);
-        foreach (var field in new[] { "TmdbApiKey", "KinopoiskApiKey", "OmdbApiKey", "TvdbApiKey", "TvdbPin", "MinConfidence", "CacheTtlHours", "PreferredLanguage", "AiEnabled", "AiProvider", "AiEndpoint", "AiApiKey", "AiModel", "AiDailyRequestLimit" })
+        foreach (var field in new[] { "TmdbApiKey", "KinopoiskApiKey", "OmdbApiKey", "TvdbApiKey", "TvdbPin", "MinConfidence", "CacheTtlHours", "PreferredLanguage", "AiEnabled", "AiProvider", "AiEndpoint", "AiApiKey", "AiModel", "AiDailyRequestLimit", "FixEpisodeNumbers" })
         {
             Assert.Contains($"id=\"{field}\"", html, StringComparison.Ordinal);
         }
@@ -134,6 +134,7 @@ public class PluginConfigurationTests
             PreferredLanguage = "en",
             MinConfidence = 0.9,
             CacheTtlHours = 48,
+            FixEpisodeNumbers = false,
             AiEnabled = true,
             AiProvider = AiProviderKind.OpenAiCompatible,
             AiEndpoint = "http://ollama:11434/v1",

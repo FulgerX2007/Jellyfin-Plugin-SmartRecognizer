@@ -202,4 +202,30 @@ public class RecognitionPipelineTests
         Assert.Single(seasons);
         await _tvdbEpisodes.DidNotReceiveWithAnyArgs().GetSeasonAsync(default!, default, default!, default);
     }
+
+    [Fact]
+    public async Task WholeMovieCorpus_KinopoiskAndOmdbStayIdle_WhenTmdbIsConfident()
+    {
+        // TMDb "knows" every title: it answers with exactly what was asked.
+        _tmdb.SearchAsync(Arg.Any<SearchQuery>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                var q = call.Arg<SearchQuery>();
+                return (IReadOnlyList<SourceCandidate>)[new SourceCandidate(MetadataSourceKind.Tmdb, new ProviderIdSet(Tmdb: q.Title), q.Title, [], q.Year, MediaKind.Movie)];
+            });
+        var pipeline = Create();
+        var movies = Parsing.ReleaseCorpus.AllPaths()
+            .Where(path => ReleaseNameParser.Parse(path, Parsing.ReleaseCorpus.MaxYear) is { Kind: MediaKind.Movie, Titles.Count: > 0 })
+            .ToList();
+
+        foreach (var path in movies)
+        {
+            var result = await pipeline.RecognizeAsync(new RecognitionRequest(path, null, null, MediaKind.Movie, ProviderIdSet.None, "en"), CancellationToken.None);
+            Assert.True(result is not null, $"not recognized: {path}");
+        }
+
+        Assert.True(movies.Count >= 40, $"only {movies.Count} movie paths in the corpus");
+        await _kp.DidNotReceiveWithAnyArgs().SearchAsync(default!, default);
+        await _omdb.DidNotReceiveWithAnyArgs().SearchAsync(default!, default);
+    }
 }

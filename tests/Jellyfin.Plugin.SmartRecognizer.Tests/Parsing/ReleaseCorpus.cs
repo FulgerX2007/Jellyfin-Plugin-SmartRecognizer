@@ -14,6 +14,8 @@ internal static class ReleaseCorpus
 
     private static readonly Lazy<Dictionary<string, JsonElement>> Cases = new(Load);
 
+    public static IReadOnlyList<string> AllPaths() => Cases.Value.Keys.ToList();
+
     public static TheoryData<string> Paths()
     {
         var data = new TheoryData<string>();

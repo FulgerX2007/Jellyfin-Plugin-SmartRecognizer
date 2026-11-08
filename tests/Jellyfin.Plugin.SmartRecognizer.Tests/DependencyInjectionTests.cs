@@ -49,6 +49,7 @@ public class DependencyInjectionTests
     [InlineData(typeof(SeriesProvider))]
     [InlineData(typeof(SeasonProvider))]
     [InlineData(typeof(EpisodeProvider))]
+    [InlineData(typeof(EpisodeNumberProvider))]
     [InlineData(typeof(SmartImageProvider))]
     [InlineData(typeof(KinopoiskExternalId))]
     [InlineData(typeof(KinopoiskExternalUrlProvider))]

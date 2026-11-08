@@ -494,14 +494,15 @@ public sealed record ParsedRelease
 - [x] run tests - must pass before task 23
 
 ### Task 23: Verify acceptance criteria
-- [ ] verify all requirements from Overview are implemented: 4 типа имён распознаются, 4 источника работают, `ProviderIds` проставляются
-- [ ] verify поэтапный поиск: на корпусе фильмов Кинопоиск/OMDb вызываются только когда нужно (подсчёт вызовов в тестах pipeline)
-- [ ] verify ИИ-фоллбэк: вызывается только при неудаче правил, отключён без ключа/endpoint, соблюдает суточный лимит после перезапуска
-- [ ] verify edge cases: нет ключей, недоступный источник, исчерпанная квота, низкая уверенность → нет совпадения
-- [ ] run full test suite: `dotnet test`
-- [ ] e2e tests: UI e2e-тестов в проекте нет — пропускается (ручная проверка в Post-Completion)
-- [ ] verify test coverage: `dotnet test --collect:"XPlat Code Coverage"`; цель ≥ 80% для `Parsing/` и `Matching/`
-- [ ] `dotnet build -c Release` без предупреждений; jprm-zip содержит только DLL плагина (без `Jellyfin.*`, `Microsoft.Extensions.*` и прочих сборок хоста)
+- [x] verify all requirements from Overview are implemented: 4 типа имён распознаются, 4 источника работают, `ProviderIds` проставляются
+- [x] verify поэтапный поиск: на корпусе фильмов Кинопоиск/OMDb вызываются только когда нужно (подсчёт вызовов в тестах pipeline)
+- [x] verify ИИ-фоллбэк: вызывается только при неудаче правил, отключён без ключа/endpoint, соблюдает суточный лимит после перезапуска
+- [x] verify edge cases: нет ключей, недоступный источник, исчерпанная квота, низкая уверенность → нет совпадения
+- [x] run full test suite: `dotnet test`
+- [x] e2e tests: UI e2e-тестов в проекте нет — вместо них повторный smoke-тест на живом Jellyfin 12.4: все 4 metadata-провайдера и image-провайдер первые в списках, страница настроек отдаётся, конфигурация сохраняется через API
+- [x] verify test coverage: `dotnet test --collect:"XPlat Code Coverage"`; цель ≥ 80% для `Parsing/` и `Matching/` — ✅ Parsing 99.2%, Matching 97.4%, всего 83.9% (с генерируемым кодом)
+- [x] `dotnet build -c Release` без предупреждений; jprm-zip содержит только DLL плагина (без `Jellyfin.*`, `Microsoft.Extensions.*` и прочих сборок хоста) — ✅ `smart-recognizer_0.1.0.0.zip`: DLL + meta.json
+- [x] ➕ найдено на smoke-тесте: сезон от remote-провайдера Jellyfin применяет только при «Replace all metadata» (вывод spike был неверен) → добавлен `EpisodeNumberProvider` (pre-refresh, исправляет номера до всех провайдеров) + флаг `FixEpisodeNumbers` + тесты; на живом сервере `Сезон 2/Кухня - Серия 3` → S2E3 (было S7E3)
 
 ### Task 24: [Final] Update documentation
 - [ ] создать README.md (+ из spike: неверный ненулевой номер серии исправляется через «Replace all metadata»; аниме absolute → сезон применяется со второго обновления сериала): назначение, установка (репозиторий плагинов / вручную), получение API-ключей, настройка порядка провайдеров в библиотеке (**отключить или опустить встроенные TMDb/OMDb**, иначе они подставят наивное совпадение там, где наш провайдер консервативно ничего не нашёл), ИИ-фоллбэк и приватность, примеры поддерживаемых имён

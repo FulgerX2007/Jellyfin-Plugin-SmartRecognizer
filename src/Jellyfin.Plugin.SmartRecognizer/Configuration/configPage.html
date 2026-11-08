@@ -70,6 +70,10 @@
                             <input id="MinConfidence" type="number" is="emby-input" min="0.5" max="1" step="0.05" label="Порог уверенности (0.5–1.0)" />
                             <div class="fieldDescription">Ниже порога плагин честно отвечает «не найдено», вместо того чтобы угадывать. По умолчанию 0.75.</div>
                         </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label"><input id="FixEpisodeNumbers" type="checkbox" is="emby-checkbox" /><span>Исправлять номера сезонов и серий по имени файла</span></label>
+                            <div class="fieldDescription checkboxFieldDescription">Например, «Сезон 2/Кухня - Серия 3.mkv» встроенный парсер читает как S7E5. Применяются только явные метки (S02E03, «Серия 3», папка «Сезон 2»).</div>
+                        </div>
                         <div class="inputContainer">
                             <input id="CacheTtlHours" type="number" is="emby-input" min="1" max="720" step="1" label="Кэш ответов API, часов" />
                         </div>
@@ -119,7 +123,7 @@
                 var pluginId = '6f1d2c7e-3b9a-4e51-9c8d-2a7f4b0e5d13';
                 var textFields = ['TmdbApiKey', 'KinopoiskApiKey', 'OmdbApiKey', 'TvdbApiKey', 'TvdbPin', 'PreferredLanguage', 'AiProvider', 'AiEndpoint', 'AiApiKey', 'AiModel'];
                 var numberFields = ['MinConfidence', 'CacheTtlHours', 'AiDailyRequestLimit'];
-                var boolFields = ['EnableTmdb', 'EnableKinopoisk', 'EnableOmdb', 'EnableTvdb', 'AiEnabled'];
+                var boolFields = ['EnableTmdb', 'EnableKinopoisk', 'EnableOmdb', 'EnableTvdb', 'AiEnabled', 'FixEpisodeNumbers'];
                 var page = document.querySelector('#SmartRecognizerConfigPage');
 
                 function el(id) { return page.querySelector('#' + id); }
